@@ -63,32 +63,10 @@ def checkIsland(pirate):
     if (up[0:-1] == "island" or down[0:-1] == "island") and (left[0:-1] == "island" or right[0:-1] == "island"):
         return True
     else:
-        return False
-
-# game_pos = 0
-# 0: Game just started
-# 1: One Island found
-# 2: Second Island found
-# 3: Island being captured
-
-# Make an enum for the game state
-class GameState:
-    START = 0
-    ONE_ISLAND = 1
-    TWO_ISLANDS = 2
-    CAPTURING = 3
-
-pirate_pos = dict()
-island_pos = dict()
-
-def closest_n_pirates(x, y, n, team):
-    pirates = pirate_pos.keys()
-    pirates.sort(key=lambda p: abs(p.getPosition()[0] - x) + abs(p.getPosition()[1] - y))
-    return pirates[:n]
+        return False    
 
 def ActPirate(pirate):
-    global pirate_pos
-    pirate_pos[pirate.getID()] = pirate.getPosition()
+    # complete this function
     pass
 
 def ActTeam(team):
