@@ -1,2 +1,4 @@
-# codewars
-This is our team repo
+# Codewars
+
+This is our Repo....
+Team Incoming 💪
