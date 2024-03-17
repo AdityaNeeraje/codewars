@@ -1,4 +1,3 @@
-from msilib import PID_CREATE_DTM
 import random
 import math
 
@@ -6,7 +5,7 @@ from engine import island, pirate
 
 name = "script"
 
-
+# Move a pirate to a given position
 def moveTo(x, y, Pirate):
     position = Pirate.getPosition()
     if position[0] == x and position[1] == y:
@@ -20,7 +19,7 @@ def moveTo(x, y, Pirate):
     else:
         return (position[1] < y) * 2 + 1
 
-
+# Move a pirate away from a given position
 def moveAway(x, y, Pirate):
     position = Pirate.getPosition()
     if position[0] == x and position[1] == y:
@@ -30,6 +29,7 @@ def moveAway(x, y, Pirate):
     else:
         return (position[1] > y) * 2 + 1
 
+# Move a pirate in a circle around a given position
 def circleAround(x, y, radius, Pirate, initial="abc", clockwise=True):
     position = Pirate.getPosition()
     rx = position[0]
@@ -55,6 +55,7 @@ def circleAround(x, y, radius, Pirate, initial="abc", clockwise=True):
             Pirate,
         )
     
+# Check if a pirate is next to an island
 def checkIsland(pirate):
     up = pirate.investigate_up()
     down = pirate.investigate_down()
@@ -79,15 +80,19 @@ class GameState:
     CAPTURING = 3
 
 pirate_pos = dict()
+pirate_goal = dict()
 island_pos = dict()
 
+# Get the closest n pirates to a given position
 def closest_n_pirates(x, y, n, team):
     pirates = pirate_pos.keys()
     pirates.sort(key=lambda p: abs(p.getPosition()[0] - x) + abs(p.getPosition()[1] - y))
     return pirates[:n]
 
+
 def ActPirate(pirate):
     global pirate_pos
+    pirate.set
     pirate_pos[pirate.getID()] = pirate.getPosition()
     pass
 
