@@ -225,10 +225,20 @@ def ActPirate(pirate):
     pirate_pos[pirate.getID()] = pirate.getPosition()
     p = pirate.getDeployPoint()
     frame = pirate.getCurrentFrame()
-    if(frame % 150 < 75 and frame < 2000):
-        return moveTo(39-p[0], 39-p[1], pirate)
-    elif(frame % 150 > 75 and frame < 2000):
-        return moveTo(p[0], p[1], pirate)
+    if(frame % 150 < 75 and frame < 1000):
+        if pirate.getID()%2 == 1:
+            return moveTo(39-p[0], 39-p[1], pirate)
+        else:
+            return moveTo(39-p[0], p[1], pirate)
+    elif(frame % 150 > 75 and frame < 1000):
+        if pirate.getID()%2 == 1:
+            return moveTo(p[0], p[1], pirate)
+        else:
+            return moveTo(p[0], 39-p[1], pirate)
+    if (frame % 80 < 40 and 1000 <= frame < 2000):
+        return moveTo(39-p[0], p[1], pirate)
+    elif frame % 80 > 40 and 1000 <= frame < 2000:
+        return moveTo(p[0], 39-p[1], pirate)
     else:
         up = pirate.investigate_up()
         down = pirate.investigate_down()
