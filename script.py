@@ -554,7 +554,7 @@ def ActPirate(pirate):
     if id in deploy_guards:
         return ActGuard(deploy_guards[id][0], deploy_guards[id][1], pirate, deploy_guards[id][2])
     if not reached_end and possible_positions:
-        if pirate.getDeployPoint()[0] != pirate.getDeployPoint()[1]:
+        if (pirate.getDeployPoint()[0] == 0 and pirate.getDeployPoint()[1] == 0) or (pirate.getDeployPoint()[0] == dimensionX - 1 and pirate.getDeployPoint()[1] == dimensionY-1):
             if id%2 == 1:
                 possible_positions = dict(sorted(possible_positions.items(), key=lambda x: (x[1], x[0][0])))
             else:
@@ -569,76 +569,76 @@ def ActPirate(pirate):
         return moveTo(choice[0], choice[1], pirate)
     if id%10 == 1:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 8
-        elif p[0] == 0 and p[1] == 39:
-            p[0] = 8
-        elif p[0] == 39 and p[1] == 39:
-            p[1] = 31
-        elif p[0] == 39 and p[1] == 0:
-            p[0] = 31
+            p[1] = dimensionY//5
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[0] = dimensionX//5
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[1] = dimensionX - 1 - dimensionX//5
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[0] = dimensionY - 1 - dimensionY//5
     if id%10 == 2:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 16
-        elif p[0] == 0 and p[1] == 39:
-            p[0] = 16
-        elif p[0] == 39 and p[1] == 39:
-            p[1] = 23
-        elif p[0] == 39 and p[1] == 0:
-            p[0] = 23
+            p[1] = 2*(dimensionY//5)
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[0] = 2*(dimensionX//5)
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - 2*(dimensionY//5)
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[0] = dimensionX - 1 - 2*(dimensionX//5)
     if id%10 == 3:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 24
-        elif p[0] == 0 and p[1] == 39:
-            p[0] = 24
-        elif p[0] == 39 and p[1] == 39:
-            p[1] = 15
+            p[1] = 3*(dimensionY//5)
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[0] = 3*(dimensionX//5)
+        elif p[0] == dimensionX - 1 and p[1] == dimensionX - 1:
+            p[1] = dimensionY - 1 - 3*(dimensionY//5)
         elif p[0] == 39 and p[1] == 0:
-            p[0] = 15
+            p[0] = dimensionX - 1 - 3*(dimensionX//5)
     if id%10 == 4:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 32
-        elif p[0] == 0 and p[1] == 39:
-            p[0] = 32
-        elif p[0] == 39 and p[1] == 39:
-            p[1] = 7
-        elif p[0] == 39 and p[1] == 0:
-            p[0] = 7
+            p[1] = 4*(dimensionY//5)
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[0] = 4*(dimensionX//5)
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - 4*(dimensionY//5)
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[0] = dimensionX - 1 - 4*(dimensionX//5)
     if id%10 == 5:
             if p[0] == 0 and p[1] == 0:
-                p[0] = 8
-            elif p[0] == 0 and p[1] == 39:
-                p[1] = 31
-            elif p[0] == 39 and p[1] == 39:
-                p[0] = 31
-            elif p[0] == 39 and p[1] == 0:
-                p[1] = 8
+                p[0] = dimensionX//5
+            elif p[0] == 0 and p[1] == dimensionY - 1:
+                p[1] = dimensionY - 1 - dimensionY//5
+            elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+                p[0] = dimensionX - 1 - dimensionX//5
+            elif p[0] == dimensionX - 1 and p[1] == 0:
+                p[1] = dimensionY//5
     if id%10 == 6:
         if p[0] == 0 and p[1] == 0:
-            p[0] = 16
-        elif p[0] == 0 and p[1] == 39:
-            p[1] = 23
-        elif p[0] == 39 and p[1] == 39:
-            p[0] = 23
-        elif p[0] == 39 and p[1] == 0:
-            p[1] = 16
+            p[0] = 2*(dimensionX//5)
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - 2*(dimensionY//5)
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[0] = dimensionX - 1 - 2*(dimensionX//5)
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[1] = 2*(dimensionY//5)
     if id%10 == 7:
             if p[0] == 0 and p[1] == 0:
-                p[0] = 24
-            elif p[0] == 0 and p[1] == 39:
-                p[1] = 15
-            elif p[0] == 39 and p[1] == 39:
-                p[0] = 15
-            elif p[0] == 39 and p[1] == 0:
-                p[1] = 24   
+                p[0] = 3*(dimensionX//5)
+            elif p[0] == 0 and p[1] == dimensionY - 1:
+                p[1] = dimensionY - 1 - 3*(dimensionY//5)
+            elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+                p[0] = dimensionX - 1 - 3*(dimensionX//5)
+            elif p[0] == dimensionX - 1 and p[1] == 0:
+                p[1] = 3*(dimensionY//5)   
     if id%10 == 8:
         if p[0] == 0 and p[1] == 0:
-            p[0] = 32
-        elif p[0] == 0 and p[1] == 39:
-            p[1] = 7
-        elif p[0] == 39 and p[1] == 39:
-            p[0] = 7
-        elif p[0] == 39 and p[1] == 0:
-            p[1] = 32    
+            p[0] = 4*(dimensionX//5)
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - 4*(dimensionY//5)
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[0] = dimensionX - 1 - 4*(dimensionX//5)
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[1] = 4*(dimensionY//5)
     
     checkIsland(pirate=pirate)
 
@@ -696,9 +696,9 @@ def ActPirate(pirate):
     #         return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
     if(frame % 40 >= 20 and frame%600 >= 300 and frame < 1000):
         if id%8 == 1:
-            return moveTo(random.randint(15,25), p[1], pirate)
+            return moveTo(random.randint(dimensionX//2 - 5,dimensionX//2 + 5), p[1], pirate)
         elif id%8 == 5:
-            return moveTo(p[0], random.randint(15,25), pirate)
+            return moveTo(p[0], random.randint(dimensionY//2 - 5,dimensionY//2 + 5), pirate)
         elif id%4 == 2:
             return moveTo(39-p[0], random.randint(15,25), pirate)
         else:
@@ -733,7 +733,8 @@ def ActPirate(pirate):
         #     or (down == "island2" and s[1] != "myCaptured")
         #     or (down == "island3" and s[2] != "myCaptured")
         # ):
-        #     s = down[-1] + str(x) + "," + str(y + 1)
+        #     s = down[-1] + str(x) + "," + str(y + 1)Please keep this fixed, too much of a headache otherwise
+
         #     b += 1
         #     pirate.setSignal("mid")
 
