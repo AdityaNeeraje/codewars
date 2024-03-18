@@ -589,32 +589,51 @@ def ActPirate(pirate):
         p = pirate.getDeployPoint()
     if (frame < 75):
         return moveTo(39-p[0], 39-p[1], pirate)
-    if (frame%150 < 75 and frame < 2000):
+    if (frame%234 < 182 and frame%26 != 0 and frame < 2000):
         if destinations_for_actors.get(id) is not None:
             return moveTo(destinations_for_actors[id][0], destinations_for_actors[id][1], pirate)
         else:
             destination_probabilities = dict(sorted(destination_visits.items(), key=lambda x: x[1]))
-            destinations_for_actors[id] = list(destination_probabilities.keys())[0]
-            destination_visits[destinations_for_actors[id]] += 1;
+            destinations = list(destination_probabilities.keys())
+            # print (abs(destinations[0][0] - 24)+abs(destinations[0][1]- 24))
+            # while abs(destinations[-1][0] - pirate.getPosition()[0]) + abs(destinations[-1][1] - pirate.getPosition()[1]) < 30:
+            #     destinations.pop()
+            if (pirate.getPosition()[0] < 20 and pirate.getPosition()[1] < 20):
+                destinations_for_actors[id] = (random.randint(0,19), random.randint(0,19))
+            elif (pirate.getPosition()[0] >= 20 and pirate.getPosition()[1] > 20):
+                destinations_for_actors[id] = (random.randint(20,39), random.randint(20,39))
+            elif (pirate.getPosition()[0] < 20 and pirate.getPosition()[1] > 20):
+                destinations_for_actors[id] = (random.randint(0,39), random.randint(20,39))
+            else:
+                destinations_for_actors[id] = (random.randint(20,39), random.randint(0,19))
+            # destinations_for_actors[id] = (random.randint(0,36), random.randint(0,36))
+            print(destinations_for_actors[id])
+            destination_visits[destinations_for_actors[id]] += 1
+            # print(True)
             return moveTo(destinations_for_actors[id][0], destinations_for_actors[id][1], pirate)
-    if (frame%150 == 75 and frame < 2000):
+    if (frame%26 == 0 and frame < 2000):
         destinations_for_actors = {}
-        destination_visits = [(x, y) for x in range(40) for y in range(40)]
-        random.shuffle(destination_visits)
-        destination_visits = {
-            pos: 0 for pos in destination_visits
-        }
-    if(frame % 150 >= 75 and frame < 2000):
+        try:
+            if max(destination_visits.values()) > 0 and frame%52 == 0:
+                destinations_to_visit = [(x, y) for x in range(40) for y in range(40)]
+                random.shuffle(destinations_to_visit)
+                destination_visits = {
+                    pos: 0 for pos in destinations_to_visit
+                }
+        except:
+            pass
+    if(frame % 234 >= 182 and frame < 2000):
+        # print(False)
     # if (frame%600 < 300 and frame < 1000):
         width = 2
         if id%16 == 1:
-            return moveTo(random.randint(max(0,p[0]-width),min(p[0]+width+1,40)), random.randint(max(0,p[1]-width),min(p[1]+width+1,40)), pirate)
+            return moveTo(random.randint(max(0,p[0]-width),min(p[0]+width,39)), random.randint(max(0,p[1]-width),min(p[1]+width,39)), pirate)
         elif id%4 == 2:
-            return moveTo(random.randint(max(0,p[0]-width),min(p[0]+width+1,40)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width+1,40)), pirate)
+            return moveTo(random.randint(max(0,p[0]-width),min(p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
         elif id%4 == 3:
-            return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width+1,40)), random.randint(max(0,p[1]-width),min(p[1]+width+1,40)), pirate)
+            return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,p[1]-width),min(p[1]+width,39)), pirate)
         else:
-            return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width+1,40)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width+1,40)), pirate)
+            return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
     # if(frame % 40 >= 20 and frame%600 >= 300 and frame < 1000):
     #     if id%8 == 1:
     #         return moveTo(random.randint(15,25), p[1], pirate)
