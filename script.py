@@ -1,6 +1,8 @@
 import random
 import math
 
+from pkg_resources import run_main
+
 from engine import island, pirate
 
 name = "script"
@@ -20,6 +22,12 @@ colonists = {} # This has the id of every living colonist as a key and the coord
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
 assassins = []
 earlier_list_of_signals = []
+
+# Our resources
+gunPowder = 0
+rum = 0
+wood = 0
+
 
 def ActAsGuard(x, y, pirate, dir_island):
     up = pirate.investigate_up()[1]
@@ -168,7 +176,7 @@ def circleAround(x, y, radius, Pirate, initial="abc", clockwise=True):
             pos[(index + (clockwise * 2) - 1) % len(pos)][1],
             Pirate,
         )
-    
+
 # Check if a pirate is next to an island
 def checkIsland(pirate):
     global island_pos
@@ -183,6 +191,12 @@ def checkIsland(pirate):
     down = pirate.investigate_down()
     left = pirate.investigate_left()
     right = pirate.investigate_right()
+    if island_pos['island1'] != (0, 0) and island_pos['island2'] != (0, 0) and island_pos['island3'] != (0, 0):
+        if (up[0:-1] == "island" or down[0:-1] == "island") and (left[0:-1] == "island" or right[0:-1] == "island"):
+            return True
+        else:
+            return False
+
     nw = pirate.investigate_nw()
     ne = pirate.investigate_ne()
     se = pirate.investigate_se()
@@ -257,6 +271,9 @@ class GameState:
     CAPTURING = 3
 
 current_game_state = GameState.START
+
+def ColoniseIsland(pirate):
+    pass
 
 def update_game_state(team):
     global current_game_state
@@ -396,7 +413,7 @@ def ActPirate(pirate):
     pirate_pos[id] = pirate.getPosition()
     if id in assassins:
         print("HERE2")
-        if gunpowder > 100 and id%2 == 1:
+        if gunpowder > 100 or id%2 == 1:
             return moveTo(39-p[0], 39-p[1], pirate)
         else:
             return moveTo(38-p[0], 38-p[1], pirate)
@@ -651,7 +668,12 @@ def ActPirate(pirate):
             return random.randint(1,4)
 
 def ActTeam(team):
-    global earlier_list_of_signals, assassins, gunpowder, rum, wood
+    global earlier_list_of_signals, assassins, gunPowder, wood, rum
+
+    gunPowder = team.getTotalGunpowder()
+    wood = team.getTotalWood()
+    rum = team.getTotalRum()
+
     list_of_signals = team.getListOfSignals()
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
     dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals]
@@ -661,5 +683,5 @@ def ActTeam(team):
     if len(assassins) < 5:
         assassins = closest_n_pirates(39-team.getDeployPoint()[0], 39-team.getDeployPoint()[1], 5, team)
     earlier_list_of_signals = list_of_signals.copy()
-    gunpowder = team.getTotalGunpowder()
+    # gunpowder = team.getTotalGunpowder()
     pass
