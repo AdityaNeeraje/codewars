@@ -15,9 +15,6 @@ gunpowder = 0
 rum = 0
 wood = 0
 
-dimensionX = 40
-dimensionY = 40
-
 deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
@@ -524,22 +521,20 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global pirate_pos, assassins, gunpowder, rum, wood, possible_positions, destinations_for_actors, destination_visits, dimensionX, dimensionY
-    dimensionX = pirate.getDimensionX()
-    dimensionY = pirate.getDimensionY()
+    global pirate_pos, assassins, gunpowder, rum, wood, possible_positions, destinations_for_actors, destination_visits
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
     pirate.setSignal(f"{id}")
     pirate_pos[id] = pirate.getPosition()
     if id in assassins:
         if id == assassins[0]:
-            return moveTo(dimensionX-p[0], dimensionY-1-p[1], pirate)
+            return moveTo(39-p[0], 38-p[1], pirate)
         elif id == assassins[1]:
-            return moveTo(dimensionX-1-p[0], dimensionY-p[1], pirate)
+            return moveTo(38-p[0], 39-p[1], pirate)
         elif gunpowder > 100 or id%2 == 1:
-            return moveTo(dimensionX-p[0], dimensionY-p[1], pirate)
+            return moveTo(39-p[0], 39-p[1], pirate)
         else:
-            return moveTo(dimensionX-1-p[0], dimensionY-1-p[1], pirate)
+            return moveTo(38-p[0], 38-p[1], pirate)
 
     for island in colonists:
         if id in colonists[island]:
@@ -554,85 +549,91 @@ def ActPirate(pirate):
     if id in deploy_guards:
         return ActGuard(deploy_guards[id][0], deploy_guards[id][1], pirate, deploy_guards[id][2])
     if not reached_end and possible_positions:
-        if id%2 == 1:
-            possible_positions = dict(sorted(possible_positions.items(), key=lambda x: (x[1], x[0][0])))
+        if pirate.getDeployPoint()[0] != pirate.getDeployPoint()[1]:
+            if id%2 == 1:
+                possible_positions = dict(sorted(possible_positions.items(), key=lambda x: (x[1], x[0][0])))
+            else:
+                possible_positions = dict(sorted(possible_positions.items(), key=lambda x: (x[1], -x[0][1])))
         else:
-            possible_positions = dict(sorted(possible_positions.items(), key=lambda x: (x[1], x[0][1])))
+            if id%2 == 1:
+                possible_positions = dict(sorted(possible_positions.items(), key=lambda x: (x[1], x[0][0])))
+            else:
+                possible_positions = dict(sorted(possible_positions.items(), key=lambda x: (x[1], x[0][1])))
         choice = list(possible_positions.keys())[0]
         possible_positions[choice] += 1
         return moveTo(choice[0], choice[1], pirate)
     if id%10 == 1:
         if p[0] == 0 and p[1] == 0:
-            p[1] = dimensionY//5
-        elif p[0] == 0 and p[1] == dimensionY - 1:
-            p[0] = dimensionX//5
-        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
-            p[1] = dimensionX - 1 - dimensionX//5
-        elif p[0] == dimensionX - 1 and p[1] == 0:
-            p[0] = dimensionY - 1 - dimensionY//5
+            p[1] = 8
+        elif p[0] == 0 and p[1] == 39:
+            p[0] = 8
+        elif p[0] == 39 and p[1] == 39:
+            p[1] = 31
+        elif p[0] == 39 and p[1] == 0:
+            p[0] = 31
     if id%10 == 2:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 2*(dimensionY//5)
-        elif p[0] == 0 and p[1] == dimensionY - 1:
-            p[0] = 2*(dimensionX//5)
-        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
-            p[1] = dimensionY - 1 - 2*(dimensionY//5)
-        elif p[0] == dimensionX - 1 and p[1] == 0:
-            p[0] = dimensionX - 1 - 2*(dimensionX//5)
+            p[1] = 16
+        elif p[0] == 0 and p[1] == 39:
+            p[0] = 16
+        elif p[0] == 39 and p[1] == 39:
+            p[1] = 23
+        elif p[0] == 39 and p[1] == 0:
+            p[0] = 23
     if id%10 == 3:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 3*(dimensionY//5)
-        elif p[0] == 0 and p[1] == dimensionY - 1:
-            p[0] = 3*(dimensionX//5)
-        elif p[0] == dimensionX - 1 and p[1] == dimensionX - 1:
-            p[1] = dimensionY - 1 - 3*(dimensionY//5)
+            p[1] = 24
+        elif p[0] == 0 and p[1] == 39:
+            p[0] = 24
+        elif p[0] == 39 and p[1] == 39:
+            p[1] = 15
         elif p[0] == 39 and p[1] == 0:
-            p[0] = dimensionX - 1 - 3*(dimensionX//5)
+            p[0] = 15
     if id%10 == 4:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 4*(dimensionY//5)
-        elif p[0] == 0 and p[1] == dimensionY - 1:
-            p[0] = 4*(dimensionX//5)
-        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
-            p[1] = dimensionY - 1 - 4*(dimensionY//5)
-        elif p[0] == dimensionX - 1 and p[1] == 0:
-            p[0] = dimensionX - 1 - 4*(dimensionX//5)
+            p[1] = 32
+        elif p[0] == 0 and p[1] == 39:
+            p[0] = 32
+        elif p[0] == 39 and p[1] == 39:
+            p[1] = 7
+        elif p[0] == 39 and p[1] == 0:
+            p[0] = 7
     if id%10 == 5:
             if p[0] == 0 and p[1] == 0:
-                p[0] = dimensionX//5
-            elif p[0] == 0 and p[1] == dimensionY - 1:
-                p[1] = dimensionY - 1 - dimensionY//5
-            elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
-                p[0] = dimensionX - 1 - dimensionX//5
-            elif p[0] == dimensionX - 1 and p[1] == 0:
-                p[1] = dimensionY//5
+                p[0] = 8
+            elif p[0] == 0 and p[1] == 39:
+                p[1] = 31
+            elif p[0] == 39 and p[1] == 39:
+                p[0] = 31
+            elif p[0] == 39 and p[1] == 0:
+                p[1] = 8
     if id%10 == 6:
         if p[0] == 0 and p[1] == 0:
-            p[0] = 2*(dimensionX//5)
-        elif p[0] == 0 and p[1] == dimensionY - 1:
-            p[1] = dimensionY - 1 - 2*(dimensionY//5)
-        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
-            p[0] = dimensionX - 1 - 2*(dimensionX//5)
-        elif p[0] == dimensionX - 1 and p[1] == 0:
-            p[1] = 2*(dimensionY//5)
+            p[0] = 16
+        elif p[0] == 0 and p[1] == 39:
+            p[1] = 23
+        elif p[0] == 39 and p[1] == 39:
+            p[0] = 23
+        elif p[0] == 39 and p[1] == 0:
+            p[1] = 16
     if id%10 == 7:
             if p[0] == 0 and p[1] == 0:
-                p[0] = 3*(dimensionX//5)
-            elif p[0] == 0 and p[1] == dimensionY - 1:
-                p[1] = dimensionY - 1 - 3*(dimensionY//5)
-            elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
-                p[0] = dimensionX - 1 - 3*(dimensionX//5)
-            elif p[0] == dimensionX - 1 and p[1] == 0:
-                p[1] = 3*(dimensionY//5)   
+                p[0] = 24
+            elif p[0] == 0 and p[1] == 39:
+                p[1] = 15
+            elif p[0] == 39 and p[1] == 39:
+                p[0] = 15
+            elif p[0] == 39 and p[1] == 0:
+                p[1] = 24   
     if id%10 == 8:
         if p[0] == 0 and p[1] == 0:
-            p[0] = 4*(dimensionX//5)
-        elif p[0] == 0 and p[1] == dimensionY - 1:
-            p[1] = dimensionY - 1 - 4*(dimensionY//5)
-        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
-            p[0] = dimensionX - 1 - 4*(dimensionX//5)
-        elif p[0] == dimensionX - 1 and p[1] == 0:
-            p[1] = 4*(dimensionY//5)
+            p[0] = 32
+        elif p[0] == 0 and p[1] == 39:
+            p[1] = 7
+        elif p[0] == 39 and p[1] == 39:
+            p[0] = 7
+        elif p[0] == 39 and p[1] == 0:
+            p[1] = 32    
     
     checkIsland(pirate=pirate)
 
@@ -641,68 +642,68 @@ def ActPirate(pirate):
     frame = pirate.getCurrentFrame() - pirate.generatingFrame
     if frame > 600:
         p = pirate.getDeployPoint()
-    if (frame < 75):
-        return moveTo(39-p[0], 39-p[1], pirate)
-    if (frame%234 < 182 and frame%26 != 0 and frame < 2000):
-        if destinations_for_actors.get(id) is not None:
-            return moveTo(destinations_for_actors[id][0], destinations_for_actors[id][1], pirate)
-        else:
-            destination_probabilities = dict(sorted(destination_visits.items(), key=lambda x: x[1]))
-            destinations = list(destination_probabilities.keys())
-            # print (abs(destinations[0][0] - 24)+abs(destinations[0][1]- 24))
-            # while abs(destinations[-1][0] - pirate.getPosition()[0]) + abs(destinations[-1][1] - pirate.getPosition()[1]) < 30:
-            #     destinations.pop()
-            if (pirate.getPosition()[0] < 20 and pirate.getPosition()[1] < 20):
-                destinations_for_actors[id] = (random.randint(0,19), random.randint(0,19))
-            elif (pirate.getPosition()[0] >= 20 and pirate.getPosition()[1] > 20):
-                destinations_for_actors[id] = (random.randint(20,39), random.randint(20,39))
-            elif (pirate.getPosition()[0] < 20 and pirate.getPosition()[1] > 20):
-                destinations_for_actors[id] = (random.randint(0,39), random.randint(20,39))
-            else:
-                destinations_for_actors[id] = (random.randint(20,39), random.randint(0,19))
-            # destinations_for_actors[id] = (random.randint(0,36), random.randint(0,36))
-            print(destinations_for_actors[id])
-            destination_visits[destinations_for_actors[id]] += 1
-            # print(True)
-            return moveTo(destinations_for_actors[id][0], destinations_for_actors[id][1], pirate)
-    if (frame%26 == 0 and frame < 2000):
-        destinations_for_actors = {}
-        try:
-            if max(destination_visits.values()) > 0 and frame%52 == 0:
-                destinations_to_visit = [(x, y) for x in range(40) for y in range(40)]
-                random.shuffle(destinations_to_visit)
-                destination_visits = {
-                    pos: 0 for pos in destinations_to_visit
-                }
-        except:
-            pass
-    if(frame % 234 >= 182 and frame < 2000):
-        # print(False)
-    # if (frame%600 < 300 and frame < 1000):
-        width = 2
-        if id%16 == 1:
-            return moveTo(random.randint(max(0,p[0]-width),min(p[0]+width,39)), random.randint(max(0,p[1]-width),min(p[1]+width,39)), pirate)
-        elif id%4 == 2:
-            return moveTo(random.randint(max(0,p[0]-width),min(p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
-        elif id%4 == 3:
-            return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,p[1]-width),min(p[1]+width,39)), pirate)
-        else:
-            return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
-    # if(frame % 40 >= 20 and frame%600 >= 300 and frame < 1000):
-    #     if id%8 == 1:
-    #         return moveTo(random.randint(15,25), p[1], pirate)
-    #     elif id%8 == 5:
-    #         return moveTo(p[0], random.randint(15,25), pirate)
-    #     elif id%4 == 2:
-    #         return moveTo(39-p[0], random.randint(15,25), pirate)
+    # if (frame < 75):
+    #     return moveTo(39-p[0], 39-p[1], pirate)
+    # if (frame%234 < 182 and frame%26 != 0 and frame < 2000):
+    #     if destinations_for_actors.get(id) is not None:
+    #         return moveTo(destinations_for_actors[id][0], destinations_for_actors[id][1], pirate)
     #     else:
-    #         return moveTo(random.randint(15,25), 39-p[1], pirate)
-    # if (frame%40 < 20 and frame%600 >= 300 and frame < 1000):
-    #     return moveTo(random.randint(17, 23), random.randint(17, 23), pirate)
-    # if (frame % 80 < 40 and 1000 <= frame < 2000):
-    #     return moveTo(39-p[0], p[1], pirate)
-    # elif frame % 80 > 40 and 1000 <= frame < 2000:
-    #     return moveTo(p[0], 39-p[1], pirate)
+    #         destination_probabilities = dict(sorted(destination_visits.items(), key=lambda x: x[1]))
+    #         destinations = list(destination_probabilities.keys())
+    #         # print (abs(destinations[0][0] - 24)+abs(destinations[0][1]- 24))
+    #         # while abs(destinations[-1][0] - pirate.getPosition()[0]) + abs(destinations[-1][1] - pirate.getPosition()[1]) < 30:
+    #         #     destinations.pop()
+    #         if (pirate.getPosition()[0] < 20 and pirate.getPosition()[1] < 20):
+    #             destinations_for_actors[id] = (random.randint(0,19), random.randint(0,19))
+    #         elif (pirate.getPosition()[0] >= 20 and pirate.getPosition()[1] > 20):
+    #             destinations_for_actors[id] = (random.randint(20,39), random.randint(20,39))
+    #         elif (pirate.getPosition()[0] < 20 and pirate.getPosition()[1] > 20):
+    #             destinations_for_actors[id] = (random.randint(0,39), random.randint(20,39))
+    #         else:
+    #             destinations_for_actors[id] = (random.randint(20,39), random.randint(0,19))
+    #         # destinations_for_actors[id] = (random.randint(0,36), random.randint(0,36))
+    #         print(destinations_for_actors[id])
+    #         destination_visits[destinations_for_actors[id]] += 1
+    #         # print(True)
+    #         return moveTo(destinations_for_actors[id][0], destinations_for_actors[id][1], pirate)
+    # if (frame%26 == 0 and frame < 2000):
+    #     destinations_for_actors = {}
+    #     try:
+    #         if max(destination_visits.values()) > 0 and frame%52 == 0:
+    #             destinations_to_visit = [(x, y) for x in range(40) for y in range(40)]
+    #             random.shuffle(destinations_to_visit)
+    #             destination_visits = {
+    #                 pos: 0 for pos in destinations_to_visit
+    #             }
+    #     except:
+    #         pass
+    # if(frame % 234 >= 182 and frame < 2000):
+    #     # print(False)
+    # # if (frame%600 < 300 and frame < 1000):
+    #     width = 2
+    #     if id%16 == 1:
+    #         return moveTo(random.randint(max(0,p[0]-width),min(p[0]+width,39)), random.randint(max(0,p[1]-width),min(p[1]+width,39)), pirate)
+    #     elif id%4 == 2:
+    #         return moveTo(random.randint(max(0,p[0]-width),min(p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
+    #     elif id%4 == 3:
+    #         return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,p[1]-width),min(p[1]+width,39)), pirate)
+    #     else:
+    #         return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
+    if(frame % 40 >= 20 and frame%600 >= 300 and frame < 1000):
+        if id%8 == 1:
+            return moveTo(random.randint(15,25), p[1], pirate)
+        elif id%8 == 5:
+            return moveTo(p[0], random.randint(15,25), pirate)
+        elif id%4 == 2:
+            return moveTo(39-p[0], random.randint(15,25), pirate)
+        else:
+            return moveTo(random.randint(15,25), 39-p[1], pirate)
+    if (frame%40 < 20 and frame%600 >= 300 and frame < 1000):
+        return moveTo(random.randint(17, 23), random.randint(17, 23), pirate)
+    if (frame % 80 < 40 and 1000 <= frame < 2000):
+        return moveTo(39-p[0], p[1], pirate)
+    elif frame % 80 > 40 and 1000 <= frame < 2000:
+        return moveTo(p[0], 39-p[1], pirate)
     else:
         up = pirate.investigate_up()
         down = pirate.investigate_down()
@@ -727,8 +728,7 @@ def ActPirate(pirate):
         #     or (down == "island2" and s[1] != "myCaptured")
         #     or (down == "island3" and s[2] != "myCaptured")
         # ):
-        #     s = down[-1] + str(x) + "," + str(y + 1)Please keep this fixed, too much of a headache otherwise
-
+        #     s = down[-1] + str(x) + "," + str(y + 1)
         #     b += 1
         #     pirate.setSignal("mid")
 
@@ -854,6 +854,14 @@ def ActTeam(team):
     if not reached_end:
         start_x, start_y = team.getDeployPoint()
         positions_i_want = [(x, y) for x in range(39,-1,-1) for y in range(39,-1,-1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
+        if start_x == 39 and start_y == 39:
+            positions_i_want = [(x, y) for x in range(39,-1,-1) for y in range(39,-1,-1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
+        if start_x == 0 and start_y == 0:
+            positions_i_want = [(x, y) for x in range(40) for y in range(40) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
+        if start_x == 0 and start_y == 39:
+            positions_i_want = [(x, y) for x in range(0, 40) for y in range(39, -1, -1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
+        if start_x == 39 and start_y == 0:
+            positions_i_want = [(x, y) for x in range(39, -1, -1) for y in range(40) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
         # random.shuffle(positions_i_want)
         # if (team.getCurrentFrame() % 2 == 0):
         #     positions_i_want.reverse()
