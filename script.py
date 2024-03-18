@@ -1,3 +1,4 @@
+from calendar import c
 import random
 import math
 
@@ -17,12 +18,12 @@ gunpowder = 0
 rum = 0
 wood = 0
 
-guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
-colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
-pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
-randomised = {}
-mid = {}
-move = {}
+guards = dict() # This has the id of every living guard as a key and their position and direction relative to island center as values.
+colonists = dict() # This has the id of every living colonist as a key and the coordinate of their island center as value
+pirates = dict() # This has the id of every living pirate as a key and the generating frame and coordinates as values
+randomised = set()
+mid = set()
+move = set()
 assassins = []
 earlier_list_of_signals = []
 
@@ -424,8 +425,8 @@ def ActPirate(pirate):
         else:
             return moveTo(38-p[0], 38-p[1], pirate)
         
-    # if pirate in colonists:
-    
+    if id in colonists:
+        return moveTo(island_pos[colonists[id]][0], island_pos[colonists[id]][1], pirate)
 
     if id%10 == 1:
         if p[0] == 0 and p[1] == 0:
@@ -539,7 +540,6 @@ def ActPirate(pirate):
         left = pirate.investigate_left()
         right = pirate.investigate_right()
         x, y = pirate.getPosition()
-        pirate.setSignal("")
         s = pirate.trackPlayers()
         
         if (
@@ -679,22 +679,43 @@ def ActPirate(pirate):
             return random.randint(1,4)
 
 def ActTeam(team):
-    global earlier_list_of_signals, assassins, gunPowder, wood, rum
+    global earlier_list_of_signals, assassins, gunPowder, wood, rum, island_pos, colonists
 
     gunPowder = team.getTotalGunpowder()
     wood = team.getTotalWood()
     rum = team.getTotalRum()
+    if 'island1' not in island_pos:
+        island_pos['island1'] = (0, 0)
+    if 'island2' not in island_pos:
+        island_pos['island2'] = (0, 0)
+    if 'island3' not in island_pos:
+        island_pos['island3'] = (0, 0)
 
-    # pirates = 
 
+    track = team.trackPlayers()
+    print(team.trackPlayers())
+    for i in range(3):
+        if track[i] == '' and island_pos[f'island{i+1}'] != (0, 0):
+            pirates = set(closest_n_pirates(island_pos[f'island{i+1}'][0], island_pos[f'island{i+1}'][1], 3, team))
+            for pirate in pirates:
+                colonists[pirate] = f'island{i+1}'
+            
+    print(colonists)
     list_of_signals = team.getListOfSignals()
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
     dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals]
+
     for id in dead_pirates:
         if id in assassins:
             assassins.remove(id)
         if id in pirate_pos:
             del pirate_pos[id]
+        if str(id) in colonists:
+            del colonists[id]
+        if id in colonists:
+            del colonists[id]
+        
+    print(f'Ghosts: {set(colonists.keys(    ))-set(pirate_pos.keys())}')
     if len(assassins) < 6:
         assassins = closest_n_pirates(39-team.getDeployPoint()[0], 39-team.getDeployPoint()[1], 5, team)
     earlier_list_of_signals = list_of_signals.copy()
