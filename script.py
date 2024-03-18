@@ -412,7 +412,6 @@ def ActPirate(pirate):
     pirate.setSignal(f"{id}")
     pirate_pos[id] = pirate.getPosition()
     if id in assassins:
-        print("HERE2")
         if gunpowder > 100 or id%2 == 1:
             return moveTo(39-p[0], 39-p[1], pirate)
         else:
@@ -680,6 +679,8 @@ def ActTeam(team):
     for id in dead_pirates:
         if id in assassins:
             assassins.remove(id)
+        if id in pirate_pos:
+            del pirate_pos[id]
     if len(assassins) < 5:
         assassins = closest_n_pirates(39-team.getDeployPoint()[0], 39-team.getDeployPoint()[1], 5, team)
     earlier_list_of_signals = list_of_signals.copy()
