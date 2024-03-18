@@ -15,7 +15,7 @@ gunpowder = 0
 rum = 0
 wood = 0
 
-guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
+deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
 assassins = []
@@ -491,6 +491,8 @@ def ActPirate(pirate):
             return moveTo(39-p[0], 39-p[1], pirate)
         else:
             return moveTo(38-p[0], 38-p[1], pirate)
+    if id in deploy_guards:
+        return ActGuard(deploy_guards[id][0], deploy_guards[id][1], pirate, deploy_guards[id][2])
     if not reached_end and possible_positions:
         if id%2 == 1:
             possible_positions = dict(sorted(possible_positions.items(), key=lambda x: (x[1], x[0][0])))
@@ -754,7 +756,7 @@ def ActPirate(pirate):
             return random.randint(1,4)
 
 def ActTeam(team):
-    global earlier_list_of_signals, assassins, gunPowder, wood, rum, possible_positions, reached_end
+    global earlier_list_of_signals, assassins, gunPowder, wood, rum, possible_positions, reached_end, deploy_guards
     if not reached_end:
         start_x, start_y = team.getDeployPoint()
         positions_i_want = [(x, y) for x in range(39,-1,-1) for y in range(39,-1,-1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
@@ -765,20 +767,64 @@ def ActTeam(team):
         if (39-start_x, 39-start_y) in possible_positions:
             reached_end = True
 
+
     gunPowder = team.getTotalGunpowder()
     wood = team.getTotalWood()
     rum = team.getTotalRum()
 
+    start_x, start_y = team.getDeployPoint()
     list_of_signals = team.getListOfSignals()
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
     dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals]
     for id in dead_pirates:
         if id in assassins:
             assassins.remove(id)
+        if id in deploy_guards:
+            del deploy_guards[id]
         if id in pirate_pos:
             del pirate_pos[id]
-    if len(assassins) < 6:
-        assassins = closest_n_pirates(39-team.getDeployPoint()[0], 39-team.getDeployPoint()[1], 5, team)
+    if len(assassins) < 6 and len(list_of_signals) >= 5:
+        assassins = closest_n_pirates(39-start_x, 39-start_y, 5, team)
+    if team.getCurrentFrame() > 40 and len(deploy_guards) < 2 and len(list_of_signals) >= 2:
+        print(closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, team))
+        print(closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, team)[1:])
+        deploy_guards = {pirate: [start_x, start_y, 'blank'] for pirate in closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, team) + closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, team)[1:]}    
+        deployed_guards = list(deploy_guards.keys())
+        if len(deployed_guards) < 2:
+            closest_to_home = closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 1, team)
+            index = 0
+        while len(deploy_guards) < 2:
+            deploy_guards[closest_to_home[index]] = [start_x, start_y, 'blank']
+            index += 1
+            deployed_guards = list(deploy_guards.keys())
+        if start_x == 0 and start_y == 0:
+            deploy_guards[deployed_guards[0]][0] = 1
+            deploy_guards[deployed_guards[0]][1] = 0
+            deploy_guards[deployed_guards[0]][2] = 'left'
+            deploy_guards[deployed_guards[1]][0] = 0
+            deploy_guards[deployed_guards[1]][1] = 1
+            deploy_guards[deployed_guards[1]][2] = 'down'
+        if start_x == 39 and start_y == 0:
+            deploy_guards[deployed_guards[0]][0] = 38
+            deploy_guards[deployed_guards[0]][1] = 0
+            deploy_guards[deployed_guards[0]][2] = 'right'
+            deploy_guards[deployed_guards[1]][0] = 39
+            deploy_guards[deployed_guards[1]][1] = 1
+            deploy_guards[deployed_guards[1]][2] = 'down'
+        if start_x == 0 and start_y == 39:
+            deploy_guards[deployed_guards[0]][0] = 1
+            deploy_guards[deployed_guards[0]][1] = 39
+            deploy_guards[deployed_guards[0]][2] = 'left'
+            deploy_guards[deployed_guards[1]][0] = 0
+            deploy_guards[deployed_guards[1]][1] = 38
+            deploy_guards[deployed_guards[1]][2] = 'up'
+        if start_x == 39 and start_y == 39:
+            deploy_guards[deployed_guards[0]][0] = 38
+            deploy_guards[deployed_guards[0]][1] = 39
+            deploy_guards[deployed_guards[0]][2] = 'right'
+            deploy_guards[deployed_guards[1]][0] = 39
+            deploy_guards[deployed_guards[1]][1] = 38
+            deploy_guards[deployed_guards[1]][2] = 'up'
     earlier_list_of_signals = list_of_signals.copy()
     # gunpowder = team.getTotalGunpowder()
     pass
