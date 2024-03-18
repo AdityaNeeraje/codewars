@@ -231,7 +231,7 @@ def checkIsland(pirate):
     if right[0][0:-1] == "island" and ne[0][0:-1] == "island" and se[0][0:-1] == "island":
         # print('Hello!!!')
         island_pos[right[0]] = (pirate.getPosition()[0]+2, pirate.getPosition()[1])
-
+    
     # if ne[0:-1] == "island" and up[0:-1] == "blank" and right[0:-1] == "blank":
     #     print('Hello!!!')
     #     island_pos[ne[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 2)
