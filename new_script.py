@@ -346,7 +346,78 @@ def checkfriends(pirate , quad ):
             sum +=1 
 
     return sum
-    
+
+def ActGuard(x,y,pirate,dir):
+    up = pirate.investigate_up()[1]
+    down = pirate.investigate_down()[1]
+    left = pirate.investigate_left()[1]
+    right = pirate.investigate_right()[1]
+    ne = pirate.investigate_ne()[1]
+    nw = pirate.investigate_nw()[1]
+    se = pirate.investigate_se()[1]
+    sw = pirate.investigate_sw()[1]
+    if dir == 'up':
+        if up == 'enemy':
+            return moveTo(x, y-1, pirate)
+        elif ne == 'enemy' or nw == 'enemy':
+            return moveTo(x, y-1, pirate)
+        if left == 'enemy':
+            return moveTo(x-1, y, pirate)
+        elif right == 'enemy':
+            return moveTo(x+1, y, pirate)
+        elif down == 'enemy':
+            return moveTo(x, y+1, pirate)
+        elif sw == 'enemy':
+            return moveTo(x-1, y, pirate)
+        elif se == 'enemy':
+            return moveTo(x+1, y, pirate)
+    if dir == 'left':
+        if left == 'enemy':
+            return moveTo(x-1, y, pirate)
+        elif nw == 'enemy' or sw == 'enemy':
+            return moveTo(x-1, y, pirate)
+        if up == 'enemy':
+            return moveTo(x, y-1, pirate)
+        elif down == 'enemy':
+            return moveTo(x, y+1, pirate)
+        elif right == 'enemy':
+            return moveTo(x+1, y, pirate)
+        elif ne == 'enemy':
+            return moveTo(x, y-1, pirate)
+        elif se == 'enemy':
+            return moveTo(x, y+1, pirate)
+    if dir == 'down':
+        if down == 'enemy':
+            return moveTo(x, y+1, pirate)
+        elif se == 'enemy' or sw == 'enemy':
+            return moveTo(x, y+1, pirate)
+        if left == 'enemy':
+            return moveTo(x-1, y, pirate)
+        elif right == 'enemy':
+            return moveTo(x+1, y, pirate)
+        elif up == 'enemy':
+            return moveTo(x, y-1, pirate)
+        elif nw == 'enemy':
+            return moveTo(x-1, y, pirate)
+        elif ne == 'enemy':
+            return moveTo(x+1, y, pirate)
+    if dir == 'right':
+        if right == 'enemy':
+            return moveTo(x+1, y, pirate)
+        elif ne == 'enemy' or se == 'enemy':
+            return moveTo(x+1, y, pirate)
+        if left == 'enemy':
+            return moveTo(x-1, y, pirate)
+        elif down == 'enemy':
+            return moveTo(x, y+1, pirate)
+        elif up == 'enemy':
+            return moveTo(x, y-1, pirate)
+        elif nw == 'enemy':
+            return moveTo(x-1, y, pirate)
+        elif sw == 'enemy':
+            return moveTo(x, y+1, pirate)
+    return moveTo(x, y, pirate)
+
 def spread(pirate):
     sw = checkfriends(pirate ,'sw' )
     se = checkfriends(pirate ,'se' )
