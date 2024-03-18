@@ -11,6 +11,10 @@ island_pos = {
     'island3': (0, 0)
 }
 
+gunpowder = 0
+rum = 0
+wood = 0
+
 guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
@@ -188,28 +192,28 @@ def checkIsland(pirate):
     # print(f'-{up[0]}--{down[0]}--{left[0]}--{right[0]}--{nw[0]}--{ne[0]}--{se[0]}--{sw[0]}-')
     # print(f'-{up[0][-1]}--{down[0][:-1]}--{left[0][-1]}--{right[0][-1]}--{nw[0][-1]}--{ne[0][-1]}--{se[0][-1]}--{sw[0][-1]}-')
     if nw[0][0:-1] == "island" and up[0][0:-1] == "blank" and left[0][0:-1] == "blank":
-        print('Hello!!!')
+        # print('Hello!!!')
         island_pos[nw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] - 2)
     if ne[0][0:-1] == "island" and up[0][0:-1] == "blank" and right[0][0:-1] == "blank":
-        print('Hello!!!')
+        # print('Hello!!!')
         island_pos[ne[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 2)
     if se[0][0:-1] == "island" and down[0][0:-1] == "blank" and right[0][0:-1] == "blank":
-        print('Hello!!!')
+        # print('Hello!!!')
         island_pos[se[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 2)
     if sw[0][0:-1] == "island" and down[0][0:-1] == "blank" and left[0][0:-1] == "blank":
-        print('Hello!!!')
+        # print('Hello!!!')
         island_pos[sw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] + 2)
     if up[0][0:-1] == "island" and nw[0][0:-1] == "island" and ne[0][0:-1] == "island":
-        print('Hello!!!')
+        # print('Hello!!!')
         island_pos[up[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]-2)
     if left[0][0:-1] == "island" and nw[0][0:-1] == "island" and sw[0][0:-1] == "island":
-        print('Hello!!!')
+        # print('Hello!!!')
         island_pos[left[0]] = (pirate.getPosition()[0]-2, pirate.getPosition()[1])
     if down[0][0:-1] == "island" and sw[0][0:-1] == "island" and se[0][0:-1] == "island":
-        print('Hello!!!')
+        # print('Hello!!!')
         island_pos[down[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]+2)
     if right[0][0:-1] == "island" and ne[0][0:-1] == "island" and se[0][0:-1] == "island":
-        print('Hello!!!')
+        # print('Hello!!!')
         island_pos[right[0]] = (pirate.getPosition()[0]+2, pirate.getPosition()[1])
 
     # if ne[0:-1] == "island" and up[0:-1] == "blank" and right[0:-1] == "blank":
@@ -281,7 +285,7 @@ def closest_n_pirates(x, y, n, team):
     # pirates = pirate_pos.keys()
     # pirates.sort(key=lambda p: abs(p.getPosition()[0] - x) + abs(p.getPosition()[1] - y))
     pirates = {k: v for k, v in sorted(pirate_pos.items(), key=lambda item: abs(item[1][0] - x) + abs(item[1][1] - y))}
-    return pirates.keys()[:n]
+    return list(pirates.keys())[:n]
 
 def checkfriends(pirate , quad ):
     sum = 0 
@@ -385,13 +389,14 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global pirate_pos, assassins
-    pirate_pos[pirate] = pirate.getPosition()
+    global pirate_pos, assassins, gunpowder, rum, wood
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
     pirate.setSignal(f"{id}")
-    if pirate in assassins:
-        if pirate.__myTeam.getTotalGunpowder() > 100 and id%2 == 1:
+    pirate_pos[id] = pirate.getPosition()
+    if id in assassins:
+        print("HERE2")
+        if gunpowder > 100 and id%2 == 1:
             return moveTo(39-p[0], 39-p[1], pirate)
         else:
             return moveTo(38-p[0], 38-p[1], pirate)
@@ -646,14 +651,15 @@ def ActPirate(pirate):
             return random.randint(1,4)
 
 def ActTeam(team):
-    global earlier_list_of_signals, assassins
+    global earlier_list_of_signals, assassins, gunpowder, rum, wood
     list_of_signals = team.getListOfSignals()
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
     dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals]
     for id in dead_pirates:
         if id in assassins:
-            del assassins[id]
+            assassins.remove(id)
     if len(assassins) < 5:
         assassins = closest_n_pirates(39-team.getDeployPoint()[0], 39-team.getDeployPoint()[1], 5, team)
     earlier_list_of_signals = list_of_signals.copy()
+    gunpowder = team.getTotalGunpowder()
     pass

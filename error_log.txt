@@ -1,6 +1,6 @@
 Traceback (most recent call last):
-  File "/home/aditya/Aditya/IIT Bombay/Freshman Year/Codewars/codewars-v4/engine/main.py", line 311, in run_game
+  File "/home/aditya/Aditya/IIT Bombay/Freshman Year/Codewars/codewars-v4/engine/main.py", line 298, in run_game
     n = self.__rscript.ActPirate(pirate_i)
-  File "/home/aditya/Aditya/IIT Bombay/Freshman Year/Codewars/codewars-v4/script.py", line 334, in ActPirate
+  File "/home/aditya/Aditya/IIT Bombay/Freshman Year/Codewars/codewars-v4/script.py", line 394, in ActPirate
     if pirate.__myTeam.getTotalGunpowder() > 100 and id%2 == 1:
 AttributeError: 'Pirate' object has no attribute '__myTeam'
