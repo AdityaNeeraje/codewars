@@ -166,6 +166,13 @@ def circleAround(x, y, radius, Pirate, initial="abc", clockwise=True):
 # Check if a pirate is next to an island
 def checkIsland(pirate):
     global island_pos
+    if 'island1' not in island_pos:
+        island_pos['island1'] = (0, 0)
+    if 'island2' not in island_pos:
+        island_pos['island2'] = (0, 0)
+    if 'island3' not in island_pos:
+        island_pos['island3'] = (0, 0)
+    # print(island_pos)
     up = pirate.investigate_up()
     down = pirate.investigate_down()
     left = pirate.investigate_left()
@@ -174,24 +181,57 @@ def checkIsland(pirate):
     ne = pirate.investigate_ne()
     se = pirate.investigate_se()
     sw = pirate.investigate_sw()
-
-    if nw[0:-1] == "island" and up[0:-1] == "blank" and left[0:-1] == "blank":
+    # print(up[0:-1] == "", down, left, right, nw, ne, se, sw)
+    # print(up[0], down[0], left[0], right[0], nw[0], ne[0], se[0], sw[0])
+    # print(f'-{up[0]}--{down[0]}--{left[0]}--{right[0]}--{nw[0]}--{ne[0]}--{se[0]}--{sw[0]}-')
+    # print(f'-{up[0][-1]}--{down[0][:-1]}--{left[0][-1]}--{right[0][-1]}--{nw[0][-1]}--{ne[0][-1]}--{se[0][-1]}--{sw[0][-1]}-')
+    if nw[0][0:-1] == "island" and up[0][0:-1] == "blank" and left[0][0:-1] == "blank":
+        print('Hello!!!')
         island_pos[nw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] - 2)
-    if ne[0:-1] == "island" and up[0:-1] == "blank" and right[0:-1] == "blank":
+    if ne[0][0:-1] == "island" and up[0][0:-1] == "blank" and right[0][0:-1] == "blank":
+        print('Hello!!!')
         island_pos[ne[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 2)
-    if se[0:-1] == "island" and down[0:-1] == "blank" and right[0:-1] == "blank":
+    if se[0][0:-1] == "island" and down[0][0:-1] == "blank" and right[0][0:-1] == "blank":
+        print('Hello!!!')
         island_pos[se[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 2)
-    if sw[0:-1] == "island" and down[0:-1] == "blank" and left[0:-1] == "blank":
+    if sw[0][0:-1] == "island" and down[0][0:-1] == "blank" and left[0][0:-1] == "blank":
+        print('Hello!!!')
         island_pos[sw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] + 2)
-    if up[0:-1] == "island" and nw[0:-1] == "island" and ne[0:-1] == "island":
+    if up[0][0:-1] == "island" and nw[0][0:-1] == "island" and ne[0][0:-1] == "island":
+        print('Hello!!!')
         island_pos[up[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]-2)
-    if left[0:-1] == "island" and nw[0:-1] == "island" and sw[0:-1] == "island":
+    if left[0][0:-1] == "island" and nw[0][0:-1] == "island" and sw[0][0:-1] == "island":
+        print('Hello!!!')
         island_pos[left[0]] = (pirate.getPosition()[0]-2, pirate.getPosition()[1])
-    if down[0:-1] == "island" and sw[0:-1] == "island" and se[0:-1] == "island":
+    if down[0][0:-1] == "island" and sw[0][0:-1] == "island" and se[0][0:-1] == "island":
+        print('Hello!!!')
         island_pos[down[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]+2)
-    if right[0:-1] == "island" and ne[0:-1] == "island" and se[0:-1] == "island":
+    if right[0][0:-1] == "island" and ne[0][0:-1] == "island" and se[0][0:-1] == "island":
+        print('Hello!!!')
         island_pos[right[0]] = (pirate.getPosition()[0]+2, pirate.getPosition()[1])
 
+    # if ne[0:-1] == "island" and up[0:-1] == "blank" and right[0:-1] == "blank":
+    #     print('Hello!!!')
+    #     island_pos[ne[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 2)
+    # if se[0:-1] == "island" and down[0:-1] == "blank" and right[0:-1] == "blank":
+    #     print('Hello!!!')
+    #     island_pos[se[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 2)
+    # if sw[0:-1] == "island" and down[0:-1] == "blank" and left[0:-1] == "blank":
+    #     print('Hello!!!')
+    #     island_pos[sw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] + 2)
+    # if up[0:-1] == "island" and nw[0:-1] == "island" and ne[0:-1] == "island":
+    #     print('Hello!!!')
+    #     island_pos[up[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]-2)
+    # if left[0:-1] == "island" and nw[0:-1] == "island" and sw[0:-1] == "island":
+    #     print('Hello!!!')
+    #     island_pos[left[0]] = (pirate.getPosition()[0]-2, pirate.getPosition()[1])
+    # if down[0:-1] == "island" and sw[0:-1] == "island" and se[0:-1] == "island":
+    #     print('Hello!!!')
+    #     island_pos[down[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]+2)
+    # if right[0:-1] == "island" and ne[0:-1] == "island" and se[0:-1] == "island":
+    #     print('Hello!!!')
+    #     island_pos[right[0]] = (pirate.getPosition()[0]+2, pirate.getPosition()[1])
+    # print(island_pos)
     if (up[0:-1] == "island" or down[0:-1] == "island") and (left[0:-1] == "island" or right[0:-1] == "island"):
         return True
     else:
@@ -236,9 +276,10 @@ island_pos = dict()
 
 # Get the closest n pirates to a given position
 def closest_n_pirates(x, y, n, team):
-    pirates = pirate_pos.keys()
-    pirates.sort(key=lambda p: abs(p.getPosition()[0] - x) + abs(p.getPosition()[1] - y))
-    return pirates[:n]
+    # pirates = pirate_pos.keys()
+    # pirates.sort(key=lambda p: abs(p.getPosition()[0] - x) + abs(p.getPosition()[1] - y))
+    pirates = {k: v for k, v in sorted(pirate_pos.items(), key=lambda item: abs(item[1][0] - x) + abs(item[1][1] - y))}
+    return pirates.keys()[:n]
 
 def checkfriends(pirate , quad ):
     sum = 0 
@@ -315,16 +356,6 @@ def setthem(pirate):
     y = s[1]
 
 b = 0
-
-def checkIsland(pirate):
-    up = pirate.investigate_up()
-    down = pirate.investigate_down()
-    left = pirate.investigate_left()
-    right = pirate.investigate_right()
-    if (up[0:-1] == "island" or down[0:-1] == "island") and (left[0:-1] == "island" or right[0:-1] == "island"):
-        return True
-    else:
-        return False
 
 def positionInIsland(pirate):
     up = pirate.investige_up()
@@ -429,6 +460,7 @@ def ActPirate(pirate):
         elif p[0] == 39 and p[1] == 0:
             p[1] = 32    
     
+    checkIsland(pirate=pirate)
 
     if pirate.getID() not in pirates:
         pirates[pirate.getID()] = [pirate.getCurrentFrame(), p[0], p[1]]
