@@ -1,14 +1,6 @@
 Traceback (most recent call last):
-<<<<<<< HEAD
-  File "/home/balaji/Desktop/codewars/engine/main.py", line 298, in run_game
-    n = self.__rscript.ActPirate(pirate_i)
-  File "/home/balaji/Desktop/codewars/script.py", line 648, in ActPirate
-    randomised.add(id)
-AttributeError: 'dict' object has no attribute 'add'
-=======
-  File "/home/aditya/Aditya/IIT Bombay/Freshman Year/Codewars/codewars-v4/engine/main.py", line 311, in run_game
-    n = self.__rscript.ActPirate(pirate_i)
-  File "/home/aditya/Aditya/IIT Bombay/Freshman Year/Codewars/codewars-v4/new_script.py", line 430, in ActPirate
-    return moveTo(choice[0], choice[1], pirate)
-TypeError: 'int' object is not subscriptable
->>>>>>> 09f2cc92e39c786df882d0217e45c1f65d97275e
+  File "/home/aditya/Aditya/IIT Bombay/Freshman Year/Codewars/codewars-v4/engine/main.py", line 307, in run_game
+    n = self.__bscript.ActPirate(pirate_i)
+  File "/home/aditya/Aditya/IIT Bombay/Freshman Year/Codewars/codewars-v4/sample_scripts/sample3.py", line 193, in ActPirate
+    if pirate.GetYourSignal() =="mid":
+AttributeError: 'Pirate' object has no attribute 'GetYourSignal'

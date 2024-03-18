@@ -584,7 +584,7 @@ def ActPirate(pirate):
     if (frame < 75):
         return moveTo(39-p[0], 39-p[1], pirate)
     if (frame%75 < 38 and frame%600 < 300 and frame < 1000):
-        return moveTo(random.randint(17, 23), random.randint(17, 23), pirate)
+        return moveTo(random.randint(7, 32), random.randint(7, 32), pirate)
     if(frame % 75 >= 38 and frame%600 < 300 and frame < 1000):
     # if (frame%600 < 300 and frame < 1000):
         width = 2
