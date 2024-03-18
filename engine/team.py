@@ -27,16 +27,13 @@ class Team:
         for _ in range(8):
             x = random.randint(0, 39)
             y = random.randint(0, 39)
-            self.create_Pirate(base[0] * 20, base[1] * 20, "")
+            self.create_Pirate(base[0] * 20, base[1] * 20)
 
-    def create_Pirate(self, x, y, signal):
+    def create_Pirate(self, x, y):
         if self.__rum >= 50:
-            str = "wncc"
-            if type(signal) != type(str):
-                signal = ""
             self.__rum -= 50
-
-            pirate_i = Pirate(self.screen, x, y, self.__type, self, signal)
+            self.__created_count += 1
+            pirate_i = Pirate(self.screen, x, y, self.__type, self, str(self.__created_count))
             self.__pirate_list.add(pirate_i)
 
             if (x // 20, y // 20) in self.__myGame._Game__PositionToPirate:
@@ -124,7 +121,6 @@ class Team:
                 if island3.red_wall_frame == -1:
                     island3.red_wall_frame = self.__curr_frame
                 self.__wood -= 50
-                # # print(island3.red_wall)
                 return
             elif (
                 self.__type == "blue"
@@ -168,8 +164,7 @@ class Team:
     def respawn(self):
         for i in range(int(self.__rum // 50)):
             x, y = self.__base
-            self.__created_count += 1
-            self.create_Pirate(x * 20, y * 20, str(self.__created_count))
+            self.create_Pirate(x * 20, y * 20)
 
     # player functions start here
 

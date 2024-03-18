@@ -17,6 +17,7 @@ class Pirate(Sprite):
         self.rect.y = y
         self.__initialSignal = signal
         self.__signal = ""
+        self.generatingFrame = self.getCurrentFrame()
 
     def friend_present(self, island, type3):
         for pirate in self.__myTeam._Team__pirate_list:
@@ -251,10 +252,10 @@ class Pirate(Sprite):
         return self.__myTeam.getDeployPoint()
 
     def getDimensionX(self):
-        return self.__myBase._Base__myGame._Game__dim[0]
+        return self.__myTeam._Team__myGame._Game__dim[0]
 
     def getDimensionY(self):
-        return self.__myBase._Base__myGame._Game__dim[1]
+        return self.__myTeam._Team__myGame._Game__dim[0]
     
     def getID(self):
         return self.__initialSignal
