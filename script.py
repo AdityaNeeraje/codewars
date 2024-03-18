@@ -408,7 +408,9 @@ def ActPirate(pirate):
     id = int(pirate.getID())
     pirate.setSignal(f"{id}")
     if pirate in assassins:
-        if gunPowder > 100 and id%2 == 1:
+        print(f'Gunpowder: {gunPowder}')
+        if gunPowder > 100 or id%2 == 1:
+            print('I am ass')
             return moveTo(39-p[0], 39-p[1], pirate)
         else:
             return moveTo(38-p[0], 38-p[1], pirate)
