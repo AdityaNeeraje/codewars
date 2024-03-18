@@ -59,11 +59,19 @@ For example:
 pirate.investigate_down()    # ('island2', 'friend')
 pirate.investigate_up()      # ('wall', 'blank')
 pirate.investigate_left()    # ('blank', 'blank')
+<<<<<<< HEAD
 pirate.investigate_right()   # ('blank', 'enemy')
 sw = pirate.investigate_sw() # ('island2', 'enemy')
 
 sw[0] # 'island2'
 sw[1] # 'enemy'
+=======
+pirate.investigate_right()   # ('enemy', 'blank')
+sw = pirate.investigate_sw() # ('enemy', 'island2')
+
+sw[0] # 'enemy'
+sw[1] # 'island2'
+>>>>>>> b37f0df72887e2c17bad084896576a107daa3742
 ```
 
 ## Signalling
@@ -123,4 +131,8 @@ Returns the X dimension of the game.
 Returns the Y dimension of the game.
 
 ### `getCurrentFrame()`
+<<<<<<< HEAD
 Returns the current time frame of the game
+=======
+Returns the current time frame of the game
+>>>>>>> b37f0df72887e2c17bad084896576a107daa3742

@@ -5,7 +5,7 @@ name = "sample3"
 
 
 def moveTo(x, y, Pirate):
-    position = Pirate.getPosition()
+    position = Pirate.GetPosition()
     if position[0] == x and position[1] == y:
         return 0
     if position[0] == x:
@@ -18,7 +18,7 @@ def moveTo(x, y, Pirate):
         return (position[1] < y) * 2 + 1
 
 def setthem(pirate):
-    s = pirate.getPosition()
+    s = pirate.GetCurretPosition()
     x = s[0]
     y = s[1]
 
@@ -39,7 +39,7 @@ def positionInIsland(pirate):
     down = pirate.investige_down()
     right = pirate.investige_right()
     left = pirate.investige_left()
-    x, y = pirate.getPosition()
+    x, y = pirate.GetPosition()
     if up[0:-1] == "island" and down[0:-1] == "island" and right[0:-1] == "island" and left[0:-1] == "island":
         return "centre"    
     if up[0:-1] != "island" and right[0:-1] == "island" and left[0:-1] != "island" and down[0:-1] == "island":
@@ -64,7 +64,7 @@ def ActPirate(pirate):
     down = pirate.investigate_down()
     left = pirate.investigate_left()
     right = pirate.investigate_right()
-    x, y = pirate.getPosition()
+    x, y = pirate.GetPosition()
     pirate.setSignal("")
     s = pirate.trackPlayers()
     
@@ -190,25 +190,25 @@ def ActPirate(pirate):
         else:
             pirate.setSignal("random")
 
-    if pirate.getSignal() =="mid":
+    if pirate.GetYourSignal() =="mid":
         return 0
 
-    elif pirate.getSignal() == "move":
+    elif pirate.GetYourSignal() == "move":
         s = pirate.GetCurrentTeamSignal()
         l = s.split(",")
         x = int(l[0][1:])
         y = int(l[1])
         return moveTo(x, y, pirate)
     
-    elif pirate.getSignal() == "random":
+    elif pirate.GetYourSignal() == "random":
         return random.randint(1,4)
 
 def ActTeam(team):
     l = team.trackPlayers()
-    s = team.getTeamSignal()
+    s = team.GetYourSignal()
 
     if s:
         island_no = int(s[0])
         signal = l[island_no - 1]
         if signal == "myCaptured":
-            team.setTeamSignal("")
+            team.SetYourSignal("")

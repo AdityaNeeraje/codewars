@@ -17,6 +17,7 @@ def moveTo(x, y, Pirate):
     else:
         return (position[1] < y) * 2 + 1
 
+pos = dict()
 
 def ActPirate(pirate):
     up = pirate.investigate_up()[0]
@@ -58,7 +59,9 @@ def ActPirate(pirate):
     ):
         s = right[-1] + str(x + 1) + "," + str(y)
         pirate.setTeamSignal(s)
-
+    global pos
+    pos[pirate.getID()] = [x, y]
+    print(pos)
     
     if pirate.getTeamSignal() != "":
         s = pirate.getTeamSignal()
