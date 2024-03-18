@@ -231,7 +231,6 @@ def checkIsland(pirate):
     if right[0][0:-1] == "island" and ne[0][0:-1] == "island" and se[0][0:-1] == "island":
         # print('Hello!!!')
         island_pos[right[0]] = (pirate.getPosition()[0]+2, pirate.getPosition()[1])
-    
     # if ne[0:-1] == "island" and up[0:-1] == "blank" and right[0:-1] == "blank":
     #     print('Hello!!!')
     #     island_pos[ne[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 2)
@@ -695,14 +694,14 @@ def ActTeam(team):
 
 
     track = team.trackPlayers()
-    print(team.trackPlayers())
+    # print(team.trackPlayers())
     for i in range(3):
         if track[i] == '' and island_pos[f'island{i+1}'] != (0, 0):
             pirates = set(closest_n_pirates(island_pos[f'island{i+1}'][0], island_pos[f'island{i+1}'][1], 3, team))
             for pirate in pirates:
                 colonists[pirate] = f'island{i+1}'
             
-    print(colonists)
+    # print(colonists)
     list_of_signals = team.getListOfSignals()
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
     dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals]
@@ -717,7 +716,7 @@ def ActTeam(team):
         if id in colonists:
             del colonists[id]
         
-    print(f'Ghosts: {set(colonists.keys(    ))-set(pirate_pos.keys())}')
+    # print(f'Ghosts: {set(colonists.keys(    ))-set(pirate_pos.keys())}')
     if len(assassins) < 6:
         assassins = closest_n_pirates(39-team.getDeployPoint()[0], 39-team.getDeployPoint()[1], 5, team)
     earlier_list_of_signals = list_of_signals.copy()
