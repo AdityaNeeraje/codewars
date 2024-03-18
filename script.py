@@ -268,6 +268,9 @@ class GameState:
 
 current_game_state = GameState.START
 
+def ColoniseIsland(pirate):
+    pass
+
 def update_game_state(team):
     global current_game_state
     captured_count = sum(1 for status in team.trackPlayers() if status == "myCaptured")
