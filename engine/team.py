@@ -121,7 +121,6 @@ class Team:
                 if island3.red_wall_frame == -1:
                     island3.red_wall_frame = self.__curr_frame
                 self.__wood -= 50
-                # # print(island3.red_wall)
                 return
             elif (
                 self.__type == "blue"

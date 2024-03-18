@@ -7,6 +7,7 @@ name = "script"
 
 guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
+pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
 
 def ActAsGuard(x, y, pirate, dir_island):
     up = pirate.investigate_up()[1]
@@ -19,38 +20,40 @@ def ActAsGuard(x, y, pirate, dir_island):
     sw = pirate.investigate_sw()[1]
     # pirate.setSignal(pirate.getSignal()[0] + str(x) + "," + str(y))
     if (dir_island=='up'):
+        if (up == 'enemy'):
+            return moveTo(x, y-1, pirate)
+        elif (ne == 'enemy' or nw == 'enemy'):
+            return moveTo(x, y-1, pirate)
         if (left == 'enemy'):
             return moveTo(x-1, y, pirate)
         elif (right == 'enemy'):
             return moveTo(x+1, y, pirate)
         elif (down == 'enemy'):
             return moveTo(x, y+1, pirate)
-        elif (up == 'enemy'):
-            return moveTo(x, y-1, pirate)
         elif (sw == 'enemy'):
             return moveTo(x-1, y, pirate)
         elif (se == 'enemy'):
             return moveTo(x+1, y, pirate)
-        elif (ne == 'enemy' or nw == 'enemy'):
-            return moveTo(x, y-1, pirate)
     if (dir_island=='down'):
+        if (down == 'enemy'):
+            return moveTo(x, y+1, pirate)
+        elif (se == 'enemy' or sw == 'enemy'):
+            return moveTo(x, y+1, pirate)
         if (left == 'enemy'):
             return moveTo(x-1, y, pirate)
         elif (right == 'enemy'):
             return moveTo(x+1, y, pirate)
-        elif (down == 'enemy'):
-            return moveTo(x, y+1, pirate)
         elif (up == 'enemy'):
             return moveTo(x, y-1, pirate)
         elif (nw == 'enemy'):
             return moveTo(x-1, y, pirate)
         elif (ne == 'enemy'):
             return moveTo(x+1, y, pirate)
-        elif (se == 'enemy' or sw == 'enemy'):
-            return moveTo(x, y+1, pirate)
     if (dir_island=='left'):
         if (left == 'enemy'):
             return moveTo(x-1, y, pirate)
+        elif (nw == 'enemy' or sw == 'enemy'):
+            return moveTo(x-1, y, pirate)
         elif (right == 'enemy'):
             return moveTo(x+1, y, pirate)
         elif (down == 'enemy'):
@@ -61,13 +64,13 @@ def ActAsGuard(x, y, pirate, dir_island):
             return moveTo(x, y-1, pirate)
         elif (se == 'enemy'):
             return moveTo(x, y+1, pirate)
-        elif (nw == 'enemy' or sw == 'enemy'):
-            return moveTo(x-1, y, pirate)
     if (dir_island=='right'):
+        if (right == 'enemy'):
+            return moveTo(x+1, y, pirate)
+        elif (ne == 'enemy' or se == 'enemy'):
+            return moveTo(x+1, y, pirate)
         if (left == 'enemy'):
             return moveTo(x-1, y, pirate)
-        elif (right == 'enemy'):
-            return moveTo(x+1, y, pirate)
         elif (down == 'enemy'):
             return moveTo(x, y+1, pirate)
         elif (up == 'enemy'):
@@ -76,9 +79,32 @@ def ActAsGuard(x, y, pirate, dir_island):
             return moveTo(x, y-1, pirate)
         elif (sw == 'enemy'):
             return moveTo(x, y+1, pirate)
-        elif (ne == 'enemy' or se == 'enemy'):
-            return moveTo(x+1, y, pirate)
     return moveTo(guards[pirate][0], guards[pirate][1], pirate)
+
+def ActColonist(x,y,pirate):
+    up = pirate.investigate_up()[1]
+    down = pirate.investigate_down()[1]
+    left = pirate.investigate_left()[1]
+    right = pirate.investigate_right()[1]
+    ne = pirate.investigate_ne()[1]
+    nw = pirate.investigate_nw()[1]
+    se = pirate.investigate_se()[1]
+    sw = pirate.investigate_sw()[1]
+    if (up == 'enemy'):
+        return moveTo(x, y-1, pirate)
+    elif (ne == 'enemy' or nw == 'enemy'):
+        return moveTo(x, y-1, pirate)
+    if (left == 'enemy'):
+        return moveTo(x-1, y, pirate)
+    elif (right == 'enemy'):
+        return moveTo(x+1, y, pirate)
+    elif (down == 'enemy'):
+        return moveTo(x, y+1, pirate)
+    elif (sw == 'enemy'):
+        return moveTo(x-1, y, pirate)
+    elif (se == 'enemy'):
+        return moveTo(x+1, y, pirate)
+    return moveTo(x, y, pirate)
 
 
 # Move a pirate to a given position
@@ -299,28 +325,107 @@ def positionInIsland(pirate):
 def ActPirate(pirate):
     global pirate_pos
     pirate_pos[pirate.getID()] = pirate.getPosition()
-    p = pirate.getDeployPoint()
+    p = list(pirate.getDeployPoint())
+    id = int(pirate.getID())
+    if id%10 == 1:
+        if p[0] == 0 and p[1] == 0:
+            p[1] = 8
+        elif p[0] == 0 and p[1] == 39:
+            p[0] = 8
+        elif p[0] == 39 and p[1] == 39:
+            p[1] = 31
+        elif p[0] == 39 and p[1] == 0:
+            p[0] = 31
+    if id%10 == 2:
+        if p[0] == 0 and p[1] == 0:
+            p[1] = 16
+        elif p[0] == 0 and p[1] == 39:
+            p[0] = 16
+        elif p[0] == 39 and p[1] == 39:
+            p[1] = 23
+        elif p[0] == 39 and p[1] == 0:
+            p[0] = 23
+    if id%10 == 3:
+        if p[0] == 0 and p[1] == 0:
+            p[1] = 24
+        elif p[0] == 0 and p[1] == 39:
+            p[0] = 24
+        elif p[0] == 39 and p[1] == 39:
+            p[1] = 15
+        elif p[0] == 39 and p[1] == 0:
+            p[0] = 15
+    if id%10 == 4:
+        if p[0] == 0 and p[1] == 0:
+            p[1] = 32
+        elif p[0] == 0 and p[1] == 39:
+            p[0] = 32
+        elif p[0] == 39 and p[1] == 39:
+            p[1] = 7
+        elif p[0] == 39 and p[1] == 0:
+            p[0] = 7
+    if id%10 == 5:
+            if p[0] == 0 and p[1] == 0:
+                p[0] = 8
+            elif p[0] == 0 and p[1] == 39:
+                p[1] = 31
+            elif p[0] == 39 and p[1] == 39:
+                p[0] = 31
+            elif p[0] == 39 and p[1] == 0:
+                p[1] = 8
+    if id%10 == 6:
+        if p[0] == 0 and p[1] == 0:
+            p[0] = 16
+        elif p[0] == 0 and p[1] == 39:
+            p[1] = 23
+        elif p[0] == 39 and p[1] == 39:
+            p[0] = 23
+        elif p[0] == 39 and p[1] == 0:
+            p[1] = 16
+    if id%10 == 7:
+            if p[0] == 0 and p[1] == 0:
+                p[0] = 24
+            elif p[0] == 0 and p[1] == 39:
+                p[1] = 15
+            elif p[0] == 39 and p[1] == 39:
+                p[0] = 15
+            elif p[0] == 39 and p[1] == 0:
+                p[1] = 24   
+    if id%10 == 8:
+        if p[0] == 0 and p[1] == 0:
+            p[0] = 32
+        elif p[0] == 0 and p[1] == 39:
+            p[1] = 7
+        elif p[0] == 39 and p[1] == 39:
+            p[0] = 7
+        elif p[0] == 39 and p[1] == 0:
+            p[1] = 32    
+    
+
+    if pirate.getID() not in pirates:
+        pirates[pirate.getID()] = [pirate.getCurrentFrame(), p[0], p[1]]
     frame = pirate.getCurrentFrame() - pirate.generatingFrame
+    if (frame < 75):
+        return moveTo(39-p[0], 39-p[1], pirate)
     if (frame%75 < 38 and frame%600 < 300 and frame < 1000):
         return moveTo(random.randint(17, 23), random.randint(17, 23), pirate)
     if(frame % 75 >= 38 and frame%600 < 300 and frame < 1000):
-        if int(pirate.getID())%16 == 1:
+        if id%16 == 1:
             return moveTo(p[0], p[1], pirate)
-        elif int(pirate.getID())%4 == 2:
+        elif id%4 == 2:
             return moveTo(p[0], 39-p[1], pirate)
-        elif int(pirate.getID())%4 == 3:
+        elif id%4 == 3:
             return moveTo(39-p[0], p[1], pirate)
         else:
             return moveTo(39-p[0], 39-p[1], pirate)
     if(frame % 40 >= 20 and frame%600 >= 300 and frame < 1000):
-        if int(pirate.getID())%16 == 1:
-            return moveTo(random.randint(15,25), 39, pirate)
-        elif int(pirate.getID())%4 == 2:
-            return moveTo(random.randint(15,25), 0, pirate)
-        elif int(pirate.getID())%4 == 3:
-            return moveTo(0, random.randint(15,25), pirate)
+        if id%8 == 1:
+            return moveTo(random.randint(15,25), p[1], pirate)
+        elif id%8 == 5:
+            return moveTo(p[0], random.randint(15,25), pirate)
+        elif id%4 == 2:
+            return moveTo(39-p[0], random.randint(15,25), pirate)
         else:
-            return moveTo(39, random.randint(15,25), pirate)
+            return moveTo(random.randint(15,25), 39-p[1], pirate)
     if (frame%40 < 20 and frame%600 >= 300 and frame < 1000):
         return moveTo(random.randint(17, 23), random.randint(17, 23), pirate)
     if (frame % 80 < 40 and 1000 <= frame < 2000):
