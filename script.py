@@ -20,6 +20,9 @@ wood = 0
 guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
+randomised = {}
+mid = {}
+move = {}
 assassins = []
 earlier_list_of_signals = []
 
@@ -417,7 +420,8 @@ def ActPirate(pirate):
         else:
             return moveTo(38-p[0], 38-p[1], pirate)
         
-    if pirate in colonists:
+    # if pirate in colonists:
+    
 
     if id%10 == 1:
         if p[0] == 0 and p[1] == 0:
@@ -541,7 +545,7 @@ def ActPirate(pirate):
         ):
             s = up[-1] + str(x) + "," + str(y - 1)
             b += 1
-            pirate.setSignal("mid")
+            mid.add(id)
 
         if (
             (down == "island1" and s[0] != "myCaptured")
@@ -550,7 +554,7 @@ def ActPirate(pirate):
         ):
             s = down[-1] + str(x) + "," + str(y + 1)
             b += 1
-            pirate.setSignal("mid")
+            mid.add(id)
 
         if (
             (left == "island1" and s[0] != "myCaptured")
@@ -560,7 +564,7 @@ def ActPirate(pirate):
             s = left[-1] + str(x - 1) + "," + str(y)
             b += 1
 
-            pirate.setSignal("mid")
+            mid.add(id)
 
 
         if (
@@ -570,7 +574,7 @@ def ActPirate(pirate):
         ):
             s = right[-1] + str(x + 1) + "," + str(y)
             b += 1
-            pirate.setSignal("mid")
+            mid.add(id)
 
 
         if (
@@ -578,7 +582,7 @@ def ActPirate(pirate):
             or (up == "island2" and s[1] == "myCaptured")
             or (up == "island3" and s[2] == "myCaptured") 
         ):
-            pirate.setSignal("mid")
+            mid.add(id)
 
         if (
             (right == "island1" and s[0] == "myCaptured")
@@ -586,7 +590,7 @@ def ActPirate(pirate):
             or (right == "island3" and s[2] == "myCaptured") 
         ):
             # pirate.SetTeamSignal(s)
-            pirate.setSignal("mid")
+            mid.add(id)
 
         if (
             (down == "island1" and s[0] == "myCaptured")
@@ -594,7 +598,7 @@ def ActPirate(pirate):
             or (down == "island3" and s[2] == "myCaptured") 
         ):
             s = down[-1] + str(x) + "," + str(y + 1)
-            pirate.setSignal("mid")
+            mid.add(id)
 
 
         if (
@@ -602,71 +606,72 @@ def ActPirate(pirate):
                 or (left == "island2" and s[1] == "myCaptured")
                 or (left == "island3" and s[2] == "myCaptured") 
             ):
-                pirate.setSignal("mid")
+                mid.add(id)
 
         if (up == "friend"):
             if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
+                mid.add(id)
             else:
                 s = up[-1] + str(x) + "," + str(y + 1)
-                pirate.setSignal("move")
+                move.add(id)
         
         if (down == "friend"):
             if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
+                mid.add(id)
             else:
                 s = up[-1] + str(x) + "," + str(y - 1)
-                pirate.setSignal("move")
+                move.add(id)
+
         
         if (left == "friend"):
             if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
+                mid.add(id)
             else:
                 s = up[-1] + str(x - 1) + "," + str(y)
-                pirate.setSignal("move")
+                move.add(id)
         
         if (right == "friend" ) :
             if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
+                mid.add(id)
             else:
                 s = up[-1] + str(x + 1) + "," + str(y)
-                pirate.setSignal("move")
+                move.add(id)
 
         if (up != "friend" and up != "enemy" ):
             if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
+                mid.add(id)
             else:
-                pirate.setSignal("random")
+                randomised.add(id)
         
         if (down != "friend" and down != "enemy"):
             if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
+                mid.add(id)
             else:
-                pirate.setSignal("random")
+                randomised.add(id)
         
         if (left != "friend" and left != "enemy" ):
             if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
+                mid.add(id)
             else:
-                pirate.setSignal("random")
+                randomised.add(id)
         
         if (right != "friend" and right != "enemy"):
             if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
+                mid.add(id)
             else:
-                pirate.setSignal("random")
+                randomised.add(id)
 
-        if pirate.getSignal() =="mid":
+        if id in mid:
             return 0
 
-        elif pirate.getSignal() == "move":
+        elif id in move:
             s = pirate.getTeamSignal()
             l = s.split(",")
             x = int(l[0][1:])
             y = int(l[1])
             return moveTo(x, y, pirate)
         
-        elif pirate.getSignal() == "random":
+        elif id in randomised:
             return random.randint(1,4)
 
 def ActTeam(team):
@@ -675,6 +680,8 @@ def ActTeam(team):
     gunPowder = team.getTotalGunpowder()
     wood = team.getTotalWood()
     rum = team.getTotalRum()
+
+    # pirates = 
 
     list_of_signals = team.getListOfSignals()
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
