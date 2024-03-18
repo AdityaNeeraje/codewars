@@ -406,7 +406,7 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global pirate_pos, assassins, gunpowder, rum, wood
+    global pirate_pos, assassins, gunpowder, rum, wood, colonists
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
     pirate.setSignal(f"{id}")
@@ -417,6 +417,9 @@ def ActPirate(pirate):
             return moveTo(39-p[0], 39-p[1], pirate)
         else:
             return moveTo(38-p[0], 38-p[1], pirate)
+        
+    if pirate in colonists:
+
     if id%10 == 1:
         if p[0] == 0 and p[1] == 0:
             p[1] = 8
