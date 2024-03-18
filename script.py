@@ -15,6 +15,9 @@ gunpowder = 0
 rum = 0
 wood = 0
 
+dimensionX = 40
+dimensionY = 40
+
 deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
@@ -521,20 +524,22 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global pirate_pos, assassins, gunpowder, rum, wood, possible_positions, destinations_for_actors, destination_visits
+    global pirate_pos, assassins, gunpowder, rum, wood, possible_positions, destinations_for_actors, destination_visits, dimensionX, dimensionY
+    dimensionX = pirate.getDimensionX()
+    dimensionY = pirate.getDimensionY()
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
     pirate.setSignal(f"{id}")
     pirate_pos[id] = pirate.getPosition()
     if id in assassins:
         if id == assassins[0]:
-            return moveTo(39-p[0], 38-p[1], pirate)
+            return moveTo(dimensionX-p[0], dimensionY-1-p[1], pirate)
         elif id == assassins[1]:
-            return moveTo(38-p[0], 39-p[1], pirate)
+            return moveTo(dimensionX-1-p[0], dimensionY-p[1], pirate)
         elif gunpowder > 100 or id%2 == 1:
-            return moveTo(39-p[0], 39-p[1], pirate)
+            return moveTo(dimensionX-p[0], dimensionY-p[1], pirate)
         else:
-            return moveTo(38-p[0], 38-p[1], pirate)
+            return moveTo(dimensionX-1-p[0], dimensionY-1-p[1], pirate)
 
     for island in colonists:
         if id in colonists[island]:
