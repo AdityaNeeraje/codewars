@@ -1,6 +1,8 @@
 import random
 import math
 
+from pkg_resources import run_main
+
 from engine import island, pirate
 
 name = "script"
@@ -16,6 +18,12 @@ colonists = {} # This has the id of every living colonist as a key and the coord
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
 assassins = []
 earlier_list_of_signals = []
+
+# Our resources
+gunPowder = 0
+rum = 0
+wood = 0
+
 
 def ActAsGuard(x, y, pirate, dir_island):
     up = pirate.investigate_up()[1]
@@ -391,13 +399,13 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global pirate_pos, assassins
+    global pirate_pos, assassins, gunPowder, rum, wood, earlier_list_of_signals, b
     pirate_pos[pirate] = pirate.getPosition()
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
     pirate.setSignal(f"{id}")
     if pirate in assassins:
-        if pirate.__myTeam.getTotalGunpowder() > 100 and id%2 == 1:
+        if gunPowder > 100 and id%2 == 1:
             return moveTo(39-p[0], 39-p[1], pirate)
         else:
             return moveTo(38-p[0], 38-p[1], pirate)
@@ -652,7 +660,12 @@ def ActPirate(pirate):
             return random.randint(1,4)
 
 def ActTeam(team):
-    global earlier_list_of_signals, assassins
+    global earlier_list_of_signals, assassins, gunPowder, wood, rum
+
+    gunPowder = team.getTotalGunpowder()
+    wood = team.getTotalWood()
+    rum = team.getTotalRum()
+
     list_of_signals = team.getListOfSignals()
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
     dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals]
