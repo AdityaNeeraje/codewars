@@ -5,6 +5,12 @@ from engine import island, pirate
 
 name = "script"
 
+island_pos = {
+    'island1': (0, 0),
+    'island2': (0, 0),
+    'island3': (0, 0)
+}
+
 # Move a pirate to a given position
 def moveTo(x, y, Pirate):
     position = Pirate.getPosition()
@@ -57,10 +63,33 @@ def circleAround(x, y, radius, Pirate, initial="abc", clockwise=True):
     
 # Check if a pirate is next to an island
 def checkIsland(pirate):
+    global island_pos
     up = pirate.investigate_up()
     down = pirate.investigate_down()
     left = pirate.investigate_left()
     right = pirate.investigate_right()
+    nw = pirate.investigate_nw()
+    ne = pirate.investigate_ne()
+    se = pirate.investigate_se()
+    sw = pirate.investigate_sw()
+
+    if nw[0:-1] == "island" and up[0:-1] == "blank" and left[0:-1] == "blank":
+        island_pos[nw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] - 2)
+    if ne[0:-1] == "island" and up[0:-1] == "blank" and right[0:-1] == "blank":
+        island_pos[ne[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 2)
+    if se[0:-1] == "island" and down[0:-1] == "blank" and right[0:-1] == "blank":
+        island_pos[se[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 2)
+    if sw[0:-1] == "island" and down[0:-1] == "blank" and left[0:-1] == "blank":
+        island_pos[sw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] + 2)
+    if up[0:-1] == "island" and nw[0:-1] == "island" and ne[0:-1] == "island":
+        island_pos[up[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]-2)
+    if left[0:-1] == "island" and nw[0:-1] == "island" and sw[0:-1] == "island":
+        island_pos[left[0]] = (pirate.getPosition()[0]-2, pirate.getPosition()[1])
+    if down[0:-1] == "island" and sw[0:-1] == "island" and se[0:-1] == "island":
+        island_pos[down[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]+2)
+    if right[0:-1] == "island" and ne[0:-1] == "island" and se[0:-1] == "island":
+        island_pos[right[0]] = (pirate.getPosition()[0]+2, pirate.getPosition()[1])
+
     if (up[0:-1] == "island" or down[0:-1] == "island") and (left[0:-1] == "island" or right[0:-1] == "island"):
         return True
     else:
@@ -225,13 +254,14 @@ def ActPirate(pirate):
     pirate_pos[pirate.getID()] = pirate.getPosition()
     p = pirate.getDeployPoint()
     frame = pirate.getCurrentFrame()
+    print(f'ID: {pirate.getID()} Frame: {frame} Position: {pirate.getPosition()}')
     if(frame % 150 < 75 and frame < 1000):
-        if pirate.getID()%2 == 1:
+        if int(pirate.getID())%2 == 1:
             return moveTo(39-p[0], 39-p[1], pirate)
         else:
             return moveTo(39-p[0], p[1], pirate)
     elif(frame % 150 > 75 and frame < 1000):
-        if pirate.getID()%2 == 1:
+        if int(pirate.getID())%2 == 1:
             return moveTo(p[0], p[1], pirate)
         else:
             return moveTo(p[0], 39-p[1], pirate)
@@ -384,4 +414,5 @@ def ActPirate(pirate):
             return random.randint(1,4)
 
 def ActTeam(team):
-    pass    
+    print(island_pos)
+    pass
