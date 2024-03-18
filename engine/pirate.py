@@ -16,7 +16,8 @@ class Pirate(Sprite):
         self.rect.x = x
         self.rect.y = y
         self.__initialSignal = signal
-        self.__signal = ""
+        self.__signal = signal
+                    # pirate_i = Pirate(self.screen, x, y, self.__type, self, str(self.__created_count))
         self.generatingFrame = self.getCurrentFrame()
 
     def friend_present(self, island, type3):

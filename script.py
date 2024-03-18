@@ -14,6 +14,8 @@ island_pos = {
 guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
+assassins = []
+earlier_list_of_signals = []
 
 def ActAsGuard(x, y, pirate, dir_island):
     up = pirate.investigate_up()[1]
@@ -389,10 +391,16 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global pirate_pos
-    pirate_pos[pirate.getID()] = pirate.getPosition()
+    global pirate_pos, assassins
+    pirate_pos[pirate] = pirate.getPosition()
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
+    pirate.setSignal(f"{id}")
+    if pirate in assassins:
+        if pirate.__myTeam.getTotalGunpowder() > 100 and id%2 == 1:
+            return moveTo(39-p[0], 39-p[1], pirate)
+        else:
+            return moveTo(38-p[0], 38-p[1], pirate)
     if id%10 == 1:
         if p[0] == 0 and p[1] == 0:
             p[1] = 8
@@ -644,5 +652,14 @@ def ActPirate(pirate):
             return random.randint(1,4)
 
 def ActTeam(team):
-    print(island_pos)
+    global earlier_list_of_signals, assassins
+    list_of_signals = team.getListOfSignals()
+    new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
+    dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals]
+    for id in dead_pirates:
+        if id in assassins:
+            del assassins[id]
+    if len(assassins) < 5:
+        assassins = closest_n_pirates(39-team.getDeployPoint()[0], 39-team.getDeployPoint()[1], 5, team)
+    earlier_list_of_signals = list_of_signals.copy()
     pass
