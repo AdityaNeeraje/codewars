@@ -22,6 +22,12 @@ assassins = []
 earlier_list_of_signals = []
 possible_positions = {}
 reached_end = False
+destination_visits = [(x, y) for x in range(40) for y in range(40)]
+random.shuffle(destination_visits)
+destination_visits = {
+    pos: 0 for pos in destination_visits
+}
+destinations_for_actors = {}
 
 # Our resources
 gunPowder = 0
@@ -458,7 +464,7 @@ def positionInIsland(pirate):
     left = pirate.investige_left()
     x, y = pirate.getPosition()
     if up[0:-1] == "island" and down[0:-1] == "island" and right[0:-1] == "island" and left[0:-1] == "island":
-        return "centre"    
+        return "centre"   
     if up[0:-1] != "island" and right[0:-1] == "island" and left[0:-1] != "island" and down[0:-1] == "island":
         return "topleft"
     if up[0:-1] != "island" and right[0:-1] != "island" and left[0:-1] == "island" and down[0:-1] == "island":
@@ -477,7 +483,7 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global pirate_pos, assassins, gunpowder, rum, wood, possible_positions
+    global pirate_pos, assassins, gunpowder, rum, wood, possible_positions, destinations_for_actors, destination_visits
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
     pirate.setSignal(f"{id}")
@@ -583,9 +589,22 @@ def ActPirate(pirate):
         p = pirate.getDeployPoint()
     if (frame < 75):
         return moveTo(39-p[0], 39-p[1], pirate)
-    if (frame%75 < 38 and frame%600 < 300 and frame < 1000):
-        return moveTo(random.randint(7, 32), random.randint(7, 32), pirate)
-    if(frame % 75 >= 38 and frame%600 < 300 and frame < 1000):
+    if (frame%150 < 75 and frame < 2000):
+        if destinations_for_actors.get(id) is not None:
+            return moveTo(destinations_for_actors[id][0], destinations_for_actors[id][1], pirate)
+        else:
+            destination_probabilities = dict(sorted(destination_visits.items(), key=lambda x: x[1]))
+            destinations_for_actors[id] = list(destination_probabilities.keys())[0]
+            destination_visits[destinations_for_actors[id]] += 1;
+            return moveTo(destinations_for_actors[id][0], destinations_for_actors[id][1], pirate)
+    if (frame%150 == 75 and frame < 2000):
+        destinations_for_actors = {}
+        destination_visits = [(x, y) for x in range(40) for y in range(40)]
+        random.shuffle(destination_visits)
+        destination_visits = {
+            pos: 0 for pos in destination_visits
+        }
+    if(frame % 150 >= 75 and frame < 2000):
     # if (frame%600 < 300 and frame < 1000):
         width = 2
         if id%16 == 1:
@@ -596,164 +615,165 @@ def ActPirate(pirate):
             return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width+1,40)), random.randint(max(0,p[1]-width),min(p[1]+width+1,40)), pirate)
         else:
             return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width+1,40)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width+1,40)), pirate)
-    if(frame % 40 >= 20 and frame%600 >= 300 and frame < 1000):
-        if id%8 == 1:
-            return moveTo(random.randint(15,25), p[1], pirate)
-        elif id%8 == 5:
-            return moveTo(p[0], random.randint(15,25), pirate)
-        elif id%4 == 2:
-            return moveTo(39-p[0], random.randint(15,25), pirate)
-        else:
-            return moveTo(random.randint(15,25), 39-p[1], pirate)
-    if (frame%40 < 20 and frame%600 >= 300 and frame < 1000):
-        return moveTo(random.randint(17, 23), random.randint(17, 23), pirate)
-    if (frame % 80 < 40 and 1000 <= frame < 2000):
-        return moveTo(39-p[0], p[1], pirate)
-    elif frame % 80 > 40 and 1000 <= frame < 2000:
-        return moveTo(p[0], 39-p[1], pirate)
+    # if(frame % 40 >= 20 and frame%600 >= 300 and frame < 1000):
+    #     if id%8 == 1:
+    #         return moveTo(random.randint(15,25), p[1], pirate)
+    #     elif id%8 == 5:
+    #         return moveTo(p[0], random.randint(15,25), pirate)
+    #     elif id%4 == 2:
+    #         return moveTo(39-p[0], random.randint(15,25), pirate)
+    #     else:
+    #         return moveTo(random.randint(15,25), 39-p[1], pirate)
+    # if (frame%40 < 20 and frame%600 >= 300 and frame < 1000):
+    #     return moveTo(random.randint(17, 23), random.randint(17, 23), pirate)
+    # if (frame % 80 < 40 and 1000 <= frame < 2000):
+    #     return moveTo(39-p[0], p[1], pirate)
+    # elif frame % 80 > 40 and 1000 <= frame < 2000:
+    #     return moveTo(p[0], 39-p[1], pirate)
     else:
         up = pirate.investigate_up()
         down = pirate.investigate_down()
         left = pirate.investigate_left()
         right = pirate.investigate_right()
         x, y = pirate.getPosition()
-        pirate.setSignal("")
-        s = pirate.trackPlayers()
+        return moveAway(x, y, pirate)
+        # pirate.setSignal("")
+        # s = pirate.trackPlayers()
         
-        if (
-            (up == "island1" and s[0] != "myCaptured")
-            or (up == "island2" and s[1] != "myCaptured")
-            or (up == "island3" and s[2] != "myCaptured")
-        ):
-            s = up[-1] + str(x) + "," + str(y - 1)
-            b += 1
-            pirate.setSignal("mid")
+        # if (
+        #     (up == "island1" and s[0] != "myCaptured")
+        #     or (up == "island2" and s[1] != "myCaptured")
+        #     or (up == "island3" and s[2] != "myCaptured")
+        # ):
+        #     s = up[-1] + str(x) + "," + str(y - 1)
+        #     b += 1
+        #     pirate.setSignal("mid")
 
-        if (
-            (down == "island1" and s[0] != "myCaptured")
-            or (down == "island2" and s[1] != "myCaptured")
-            or (down == "island3" and s[2] != "myCaptured")
-        ):
-            s = down[-1] + str(x) + "," + str(y + 1)
-            b += 1
-            pirate.setSignal("mid")
+        # if (
+        #     (down == "island1" and s[0] != "myCaptured")
+        #     or (down == "island2" and s[1] != "myCaptured")
+        #     or (down == "island3" and s[2] != "myCaptured")
+        # ):
+        #     s = down[-1] + str(x) + "," + str(y + 1)
+        #     b += 1
+        #     pirate.setSignal("mid")
 
-        if (
-            (left == "island1" and s[0] != "myCaptured")
-            or (left == "island2" and s[1] != "myCaptured")
-            or (left == "island3" and s[2] != "myCaptured")
-        ):
-            s = left[-1] + str(x - 1) + "," + str(y)
-            b += 1
+        # if (
+        #     (left == "island1" and s[0] != "myCaptured")
+        #     or (left == "island2" and s[1] != "myCaptured")
+        #     or (left == "island3" and s[2] != "myCaptured")
+        # ):
+        #     s = left[-1] + str(x - 1) + "," + str(y)
+        #     b += 1
 
-            pirate.setSignal("mid")
-
-
-        if (
-            (right == "island1" and s[0] != "myCaptured")
-            or (right == "island2" and s[1] != "myCaptured")
-            or (right == "island3" and s[2] != "myCaptured")
-        ):
-            s = right[-1] + str(x + 1) + "," + str(y)
-            b += 1
-            pirate.setSignal("mid")
+        #     pirate.setSignal("mid")
 
 
-        if (
-            (up == "island1" and s[0] == "myCaptured")
-            or (up == "island2" and s[1] == "myCaptured")
-            or (up == "island3" and s[2] == "myCaptured") 
-        ):
-            pirate.setSignal("mid")
-
-        if (
-            (right == "island1" and s[0] == "myCaptured")
-            or (right == "island2" and s[1] == "myCaptured")
-            or (right == "island3" and s[2] == "myCaptured") 
-        ):
-            # pirate.SetTeamSignal(s)
-            pirate.setSignal("mid")
-
-        if (
-            (down == "island1" and s[0] == "myCaptured")
-            or (down == "island2" and s[1] == "myCaptured")
-            or (down == "island3" and s[2] == "myCaptured") 
-        ):
-            s = down[-1] + str(x) + "," + str(y + 1)
-            pirate.setSignal("mid")
+        # if (
+        #     (right == "island1" and s[0] != "myCaptured")
+        #     or (right == "island2" and s[1] != "myCaptured")
+        #     or (right == "island3" and s[2] != "myCaptured")
+        # ):
+        #     s = right[-1] + str(x + 1) + "," + str(y)
+        #     b += 1
+        #     pirate.setSignal("mid")
 
 
-        if (
-                (left == "island1" and s[0] == "myCaptured")
-                or (left == "island2" and s[1] == "myCaptured")
-                or (left == "island3" and s[2] == "myCaptured") 
-            ):
-                pirate.setSignal("mid")
+        # if (
+        #     (up == "island1" and s[0] == "myCaptured")
+        #     or (up == "island2" and s[1] == "myCaptured")
+        #     or (up == "island3" and s[2] == "myCaptured") 
+        # ):
+        #     pirate.setSignal("mid")
 
-        if (up == "friend"):
-            if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
-            else:
-                s = up[-1] + str(x) + "," + str(y + 1)
-                pirate.setSignal("move")
+        # if (
+        #     (right == "island1" and s[0] == "myCaptured")
+        #     or (right == "island2" and s[1] == "myCaptured")
+        #     or (right == "island3" and s[2] == "myCaptured") 
+        # ):
+        #     # pirate.SetTeamSignal(s)
+        #     pirate.setSignal("mid")
+
+        # if (
+        #     (down == "island1" and s[0] == "myCaptured")
+        #     or (down == "island2" and s[1] == "myCaptured")
+        #     or (down == "island3" and s[2] == "myCaptured") 
+        # ):
+        #     s = down[-1] + str(x) + "," + str(y + 1)
+        #     pirate.setSignal("mid")
+
+
+        # if (
+        #         (left == "island1" and s[0] == "myCaptured")
+        #         or (left == "island2" and s[1] == "myCaptured")
+        #         or (left == "island3" and s[2] == "myCaptured") 
+        #     ):
+        #         pirate.setSignal("mid")
+
+        # if (up == "friend"):
+        #     if checkIsland(pirate) and b<= 4:
+        #         pirate.setSignal("mid")
+        #     else:
+        #         s = up[-1] + str(x) + "," + str(y + 1)
+        #         pirate.setSignal("move")
         
-        if (down == "friend"):
-            if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
-            else:
-                s = up[-1] + str(x) + "," + str(y - 1)
-                pirate.setSignal("move")
+        # if (down == "friend"):
+        #     if checkIsland(pirate) and b<= 4:
+        #         pirate.setSignal("mid")
+        #     else:
+        #         s = up[-1] + str(x) + "," + str(y - 1)
+        #         pirate.setSignal("move")
         
-        if (left == "friend"):
-            if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
-            else:
-                s = up[-1] + str(x - 1) + "," + str(y)
-                pirate.setSignal("move")
+        # if (left == "friend"):
+        #     if checkIsland(pirate) and b<= 4:
+        #         pirate.setSignal("mid")
+        #     else:
+        #         s = up[-1] + str(x - 1) + "," + str(y)
+        #         pirate.setSignal("move")
         
-        if (right == "friend" ) :
-            if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
-            else:
-                s = up[-1] + str(x + 1) + "," + str(y)
-                pirate.setSignal("move")
+        # if (right == "friend" ) :
+        #     if checkIsland(pirate) and b<= 4:
+        #         pirate.setSignal("mid")
+        #     else:
+        #         s = up[-1] + str(x + 1) + "," + str(y)
+        #         pirate.setSignal("move")
 
-        if (up != "friend" and up != "enemy" ):
-            if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
-            else:
-                pirate.setSignal("random")
+        # if (up != "friend" and up != "enemy" ):
+        #     if checkIsland(pirate) and b<= 4:
+        #         pirate.setSignal("mid")
+        #     else:
+        #         pirate.setSignal("random")
         
-        if (down != "friend" and down != "enemy"):
-            if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
-            else:
-                pirate.setSignal("random")
+        # if (down != "friend" and down != "enemy"):
+        #     if checkIsland(pirate) and b<= 4:
+        #         pirate.setSignal("mid")
+        #     else:
+        #         pirate.setSignal("random")
         
-        if (left != "friend" and left != "enemy" ):
-            if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
-            else:
-                pirate.setSignal("random")
+        # if (left != "friend" and left != "enemy" ):
+        #     if checkIsland(pirate) and b<= 4:
+        #         pirate.setSignal("mid")
+        #     else:
+        #         pirate.setSignal("random")
         
-        if (right != "friend" and right != "enemy"):
-            if checkIsland(pirate) and b<= 4:
-                pirate.setSignal("mid")
-            else:
-                pirate.setSignal("random")
+        # if (right != "friend" and right != "enemy"):
+        #     if checkIsland(pirate) and b<= 4:
+        #         pirate.setSignal("mid")
+        #     else:
+        #         pirate.setSignal("random")
 
-        if pirate.getSignal() =="mid":
-            return 0
+        # if pirate.getSignal() =="mid":
+        #     return 0
 
-        elif pirate.getSignal() == "move":
-            s = pirate.getTeamSignal()
-            l = s.split(",")
-            x = int(l[0][1:])
-            y = int(l[1])
-            return moveTo(x, y, pirate)
+        # elif pirate.getSignal() == "move":
+        #     s = pirate.getTeamSignal()
+        #     l = s.split(",")
+        #     x = int(l[0][1:])
+        #     y = int(l[1])
+        #     return moveTo(x, y, pirate)
         
-        elif pirate.getSignal() == "random":
-            return random.randint(1,4)
+        # elif pirate.getSignal() == "random":
+        #     return random.randint(1,4)
 
 def ActTeam(team):
     global earlier_list_of_signals, assassins, gunPowder, wood, rum, possible_positions, reached_end, deploy_guards
