@@ -207,30 +207,32 @@ def checkIsland(pirate):
     # print(up[0], down[0], left[0], right[0], nw[0], ne[0], se[0], sw[0])
     # print(f'-{up[0]}--{down[0]}--{left[0]}--{right[0]}--{nw[0]}--{ne[0]}--{se[0]}--{sw[0]}-')
     # print(f'-{up[0][-1]}--{down[0][:-1]}--{left[0][-1]}--{right[0][-1]}--{nw[0][-1]}--{ne[0][-1]}--{se[0][-1]}--{sw[0][-1]}-')
-    if nw[0][0:-1] == "island" and up[0][0:-1] == "blank" and left[0][0:-1] == "blank":
-        # print('Hello!!!')
-        island_pos[nw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] - 2)
-    if ne[0][0:-1] == "island" and up[0][0:-1] == "blank" and right[0][0:-1] == "blank":
-        # print('Hello!!!')
-        island_pos[ne[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 2)
-    if se[0][0:-1] == "island" and down[0][0:-1] == "blank" and right[0][0:-1] == "blank":
-        # print('Hello!!!')
-        island_pos[se[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 2)
-    if sw[0][0:-1] == "island" and down[0][0:-1] == "blank" and left[0][0:-1] == "blank":
-        # print('Hello!!!')
-        island_pos[sw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] + 2)
-    if up[0][0:-1] == "island" and nw[0][0:-1] == "island" and ne[0][0:-1] == "island":
-        # print('Hello!!!')
-        island_pos[up[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]-2)
-    if left[0][0:-1] == "island" and nw[0][0:-1] == "island" and sw[0][0:-1] == "island":
-        # print('Hello!!!')
-        island_pos[left[0]] = (pirate.getPosition()[0]-2, pirate.getPosition()[1])
-    if down[0][0:-1] == "island" and sw[0][0:-1] == "island" and se[0][0:-1] == "island":
-        # print('Hello!!!')
-        island_pos[down[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]+2)
-    if right[0][0:-1] == "island" and ne[0][0:-1] == "island" and se[0][0:-1] == "island":
-        # print('Hello!!!')
-        island_pos[right[0]] = (pirate.getPosition()[0]+2, pirate.getPosition()[1])
+    # if nw[0][0:-1] == "island" and up[0][0:-1] == "blank" and left[0][0:-1] == "blank":
+    #     # print('Hello!!!')
+    #     island_pos[nw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] - 2)
+    # if ne[0][0:-1] == "island" and up[0][0:-1] == "blank" and right[0][0:-1] == "blank":
+    #     # print('Hello!!!')
+    #     island_pos[ne[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 2)
+    # if se[0][0:-1] == "island" and down[0][0:-1] == "blank" and right[0][0:-1] == "blank":
+    #     # print('Hello!!!')
+    #     island_pos[se[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 2)
+    # if sw[0][0:-1] == "island" and down[0][0:-1] == "blank" and left[0][0:-1] == "blank":
+    #     # print('Hello!!!')
+    #     island_pos[sw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] + 2)
+    # if up[0][0:-1] == "island" and nw[0][0:-1] == "island" and ne[0][0:-1] == "island":
+    #     # print('Hello!!!')
+    #     island_pos[up[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]-2)
+    # if left[0][0:-1] == "island" and nw[0][0:-1] == "island" and sw[0][0:-1] == "island":
+    #     # print('Hello!!!')
+    #     island_pos[left[0]] = (pirate.getPosition()[0]-2, pirate.getPosition()[1])
+    # if down[0][0:-1] == "island" and sw[0][0:-1] == "island" and se[0][0:-1] == "island":
+    #     # print('Hello!!!')
+    #     island_pos[down[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]+2)
+    # if right[0][0:-1] == "island" and ne[0][0:-1] == "island" and se[0][0:-1] == "island":
+    #     # print('Hello!!!')
+    #     island_pos[right[0]] = (pirate.getPosition()[0]+2, pirate.getPosition()[1])
+
+    
 
     # if ne[0:-1] == "island" and up[0:-1] == "blank" and right[0:-1] == "blank":
     #     print('Hello!!!')
@@ -686,12 +688,12 @@ def ActTeam(team):
     gunPowder = team.getTotalGunpowder()
     wood = team.getTotalWood()
     rum = team.getTotalRum()
-    if 'island1' not in island_pos:
-        island_pos['island1'] = (0, 0)
-    if 'island2' not in island_pos:
-        island_pos['island2'] = (0, 0)
-    if 'island3' not in island_pos:
-        island_pos['island3'] = (0, 0)
+    # if 'island1' not in island_pos:
+    #     island_pos['island1'] = (0, 0)
+    # if 'island2' not in island_pos:
+    #     island_pos['island2'] = (0, 0)
+    # if 'island3' not in island_pos:
+    #     island_pos['island3'] = (0, 0)
 
 
     track = team.trackPlayers()
