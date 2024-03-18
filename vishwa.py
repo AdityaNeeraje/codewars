@@ -128,7 +128,7 @@ def ActPirate(pirate):
     if pirate.getTeamSignal() == '42069':
         x,y = pirate.getPosition()
         strp = pirate.getSignal()
-        print(strp)
+        # print(strp)
         if(strp != ''):
             try:
                 xchange =int(strp[0])-2
