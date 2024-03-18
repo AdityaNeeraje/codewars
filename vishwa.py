@@ -19,7 +19,7 @@ def moveTo(x , y , Pirate):
 def checkfriends(pirate , quad ):
     sum = 0 
     up = pirate.investigate_up()[1]
-    print(up)
+    # # print(up)
     down = pirate.investigate_down()[1]
     left = pirate.investigate_left()[1]
     right = pirate.investigate_right()[1]
@@ -128,7 +128,7 @@ def ActPirate(pirate):
     if pirate.getTeamSignal() == '42069':
         x,y = pirate.getPosition()
         strp = pirate.getSignal()
-        print(strp)
+        # print(strp)
         if(strp != ''):
             try:
                 xchange =int(strp[0])-2
@@ -143,8 +143,8 @@ def ActPirate(pirate):
             xchange = -1
             strp = str(xchange+2)+str(ychange+2)
             pirate.setSignal(strp)
-            print(strp)
-            print("rchd end")
+            # print(strp)
+            # print("rchd end")
         elif x==0:
             xchange = 1
             strp = str(xchange+2)+str(ychange+2)
@@ -157,7 +157,7 @@ def ActPirate(pirate):
             ychange = -1
             strp = str(xchange+2)+str(ychange+2)
             pirate.setSignal(strp)
-        print(f"{xchange},{ychange}")
+        # print(f"{xchange},{ychange}")
         return moveTo(x+xchange,y+ychange,pirate)
 
     if pirate.getTeamSignal() != "":
@@ -181,7 +181,7 @@ def ActTeam(team):
 
     if team.getCurrentFrame() < 800:
         team.setTeamSignal("42069")
-        print(team.getCurrentFrame())
+        # print(team.getCurrentFrame())
     else:
         if s:
             island_no = int(s[0])

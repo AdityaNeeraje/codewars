@@ -11,6 +11,8 @@ island_pos = {
     'island3': (0, 0)
 }
 
+pirates_on_islands = 0
+
 gunpowder = 0
 rum = 0
 wood = 0
@@ -876,6 +878,10 @@ def ActTeam(team):
         if (39-start_x, 39-start_y) in possible_positions:
             reached_end = True
     
+    team.buildWalls(1)
+    team.buildWalls(2)
+    team.buildWalls(3)
+
     gunPowder = team.getTotalGunpowder()
     wood = team.getTotalWood()
     rum = team.getTotalRum()
@@ -886,10 +892,21 @@ def ActTeam(team):
     if 'island3' not in island_pos:
         island_pos['island3'] = (0, 0)
 
+    pirates_on_islands = 0
+    for island in island_pos:
+        if island_pos[island] != (0, 0):
+            for pirate in pirate_pos:
+                print(pirate_pos[pirate])
+                # if pirate_pos[pirate][0] <= island_pos[0] + 1 and pirate_pos[0] >= island_pos[0] - 1 and pirate_pos[1] <= island_pos[1] + 1 and pirate_pos[1] >= island_pos[1] - 1:
+                if pirate_pos[pirate][0] <= island_pos[island][0] + 1 and pirate_pos[pirate][0] >= island_pos[island][0] - 1 and pirate_pos[pirate][1] <= island_pos[island][1] + 1 and pirate_pos[pirate][1] >= island_pos[island][1] - 1:
+                    pirates_on_islands += 1
+    print(f'Pirates on islands: {pirates_on_islands}')
+    print(colonists)
+
     start_x, start_y = team.getDeployPoint()
     list_of_signals = team.getListOfSignals()
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
-    dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals]
+    dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals] 
     for id in dead_pirates:
         if id in assassins:
             assassins.remove(id)
@@ -904,7 +921,9 @@ def ActTeam(team):
         if island_pos[f'island{i}'] != (0, 0):
             colonists[f'island{i}'] = closest_n_pirates(island_pos[f'island{i}'][0], island_pos[f'island{i}'][1], 3, team)
             if len(colonists[f'island{i}']) < 3:
-                colonists[i].append(new_pirates.pop(0))
+                if len(new_pirates) == 0:
+                    break
+                colonists[f'island{i}'].append(new_pirates.pop(0))
 
 
     if len(assassins) < 6 and len(list_of_signals) >= 5:
