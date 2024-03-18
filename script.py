@@ -298,23 +298,23 @@ def ActColonist(pirate):
     id = int(pirate.getID())
     for island in colonists:
         if id in colonists[island]:
-            print(f'Colonists: {colonists}')
-            print(f'Island: {island}')
+            # print(f'Colonists: {colonists}')
+            # print(f'Island: {island}')
             if colonists[island][0] == id:
-                if id not in pirate_pos:
-                    print(f'Pirate dead: {id}')
-                print(f'Colonist {id} on {island} and moving to {island_pos[island]}')
+                # if id not in pirate_pos:
+                #     print(f'Pirate dead: {id}')
+                # print(f'Colonist {id} on {island} and moving to {island_pos[island]}')
                 return moveTo(island_pos[island][0], island_pos[island][1], pirate)
             elif colonists[island][1] == id:
-                if id not in pirate_pos:
-                    print(f'Pirate dead: {id}')
-                print(f'Colonist {id} on {island} and moving to {(island_pos[island][0] + 1, island_pos[island][1] + 1)}')
+                # if id not in pirate_pos:
+                #     print(f'Pirate dead: {id}')
+                # print(f'Colonist {id} on {island} and moving to {(island_pos[island][0] + 1, island_pos[island][1] + 1)}')
                 # return moveTo(island_pos[island][0] + 1, island_pos[island][1] + 1, pirate)
                 return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] + 1, island_pos[island][1] + 1))
             else:
-                if id not in pirate_pos:
-                    print(f'Pirate dead: {id}')
-                print(f'Colonist {id} on {island} and moving to {(island_pos[island][0] - 1, island_pos[island][1] - 1)}')
+                # if id not in pirate_pos:
+                #     print(f'Pirate dead: {id}')
+                # print(f'Colonist {id} on {island} and moving to {(island_pos[island][0] - 1, island_pos[island][1] - 1)}')
                 # return moveTo(island_pos[island][0] - 1, island_pos[island][1] - 1, pirate)
                 return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] - 1, island_pos[island][1] - 1))
     pass
@@ -538,6 +538,8 @@ def ActPirate(pirate):
 
     for island in colonists:
         if id in colonists[island]:
+            # print(f'Acting colonist {id} on {island}')
+            # print(f'Colonists: {colonists}')
             # print(island_pos)
             return ActColonist(pirate)
     # if id in :
@@ -868,7 +870,7 @@ def ActTeam(team):
         possible_positions = {key: 0 for key in positions_i_want}
         if (39-start_x, 39-start_y) in possible_positions:
             reached_end = True
-
+    
     gunPowder = team.getTotalGunpowder()
     wood = team.getTotalWood()
     rum = team.getTotalRum()
@@ -898,11 +900,11 @@ def ActTeam(team):
             colonists[f'island{i}'] = closest_n_pirates(island_pos[f'island{i}'][0], island_pos[f'island{i}'][1], 3, team)
             if len(colonists[f'island{i}']) < 3:
                 colonists[i].append(new_pirates.pop(0))
-
-
     if len(assassins) < 6 and len(list_of_signals) >= 5:
         assassins = closest_n_pirates(39-start_x, 39-start_y, 5, team)
     if team.getCurrentFrame() > 40 and len(deploy_guards) < 2 and len(list_of_signals) >= 2:
+        # print(closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, team))
+        # print(closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, team)[1:])
         deploy_guards = {pirate: [start_x, start_y, 'blank'] for pirate in closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, team) + closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, team)[1:]}    
         deployed_guards = list(deploy_guards.keys())
         if len(deployed_guards) < 2:
