@@ -17,7 +17,6 @@ class Pirate(Sprite):
         self.rect.y = y
         self.__initialSignal = signal
         self.__signal = ""
-        self.generatingFrame = self.getCurrentFrame()
 
     def friend_present(self, island, type3):
         for pirate in self.__myTeam._Team__pirate_list:

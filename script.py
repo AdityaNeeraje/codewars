@@ -224,29 +224,17 @@ def ActPirate(pirate):
     global pirate_pos
     pirate_pos[pirate.getID()] = pirate.getPosition()
     p = pirate.getDeployPoint()
-    frame = pirate.getCurrentFrame() - pirate.generatingFrame
-    if (frame%75 < 38 and frame%600 < 300 and frame < 1000):
-        return moveTo(random.randint(17, 23), random.randint(17, 23), pirate)
-    if(frame % 75 >= 38 and frame%600 < 300 and frame < 1000):
-        if int(pirate.getID())%16 == 1:
-            return moveTo(p[0], p[1], pirate)
-        elif int(pirate.getID())%4 == 2:
-            return moveTo(p[0], 39-p[1], pirate)
-        elif int(pirate.getID())%4 == 3:
-            return moveTo(39-p[0], p[1], pirate)
-        else:
+    frame = pirate.getCurrentFrame()
+    if(frame % 150 < 75 and frame < 1000):
+        if pirate.getID()%2 == 1:
             return moveTo(39-p[0], 39-p[1], pirate)
-    if(frame % 40 >= 20 and frame%600 >= 300 and frame < 1000):
-        if int(pirate.getID())%16 == 1:
-            return moveTo(random.randint(15,25), 39, pirate)
-        elif int(pirate.getID())%4 == 2:
-            return moveTo(random.randint(15,25), 0, pirate)
-        elif int(pirate.getID())%4 == 3:
-            return moveTo(0, random.randint(15,25), pirate)
         else:
-            return moveTo(39, random.randint(15,25), pirate)
-    if (frame%40 < 20 and frame%600 >= 300 and frame < 1000):
-        return moveTo(random.randint(17, 23), random.randint(17, 23), pirate)
+            return moveTo(39-p[0], p[1], pirate)
+    elif(frame % 150 > 75 and frame < 1000):
+        if pirate.getID()%2 == 1:
+            return moveTo(p[0], p[1], pirate)
+        else:
+            return moveTo(p[0], 39-p[1], pirate)
     if (frame % 80 < 40 and 1000 <= frame < 2000):
         return moveTo(39-p[0], p[1], pirate)
     elif frame % 80 > 40 and 1000 <= frame < 2000:
