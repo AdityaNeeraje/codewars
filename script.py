@@ -13,6 +13,10 @@ island_pos = {
     'island3': (0, 0)
 }
 
+gunpowder = 0
+rum = 0
+wood = 0
+
 guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
@@ -402,8 +406,7 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global pirate_pos, assassins, gunPowder, rum, wood, earlier_list_of_signals, b
-    pirate_pos[pirate] = pirate.getPosition()
+    global pirate_pos, assassins, gunpowder, rum, wood
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
     pirate.setSignal(f"{id}")
@@ -676,8 +679,9 @@ def ActTeam(team):
     dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals]
     for id in dead_pirates:
         if id in assassins:
-            del assassins[id]
+            assassins.remove(id)
     if len(assassins) < 5:
         assassins = closest_n_pirates(39-team.getDeployPoint()[0], 39-team.getDeployPoint()[1], 5, team)
     earlier_list_of_signals = list_of_signals.copy()
+    # gunpowder = team.getTotalGunpowder()
     pass
