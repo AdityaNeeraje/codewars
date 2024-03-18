@@ -3,7 +3,7 @@ import math
 
 from engine import island, pirate
 
-name = "script"
+name = "new_script"
 
 island_pos = {
     'island1': (0, 0),
@@ -20,6 +20,8 @@ colonists = {} # This has the id of every living colonist as a key and the coord
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
 assassins = []
 earlier_list_of_signals = []
+possible_positions = {}
+reached_end = False
 
 # Our resources
 gunPowder = 0
@@ -404,7 +406,7 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global pirate_pos, assassins, gunpowder, rum, wood
+    global pirate_pos, assassins, gunpowder, rum, wood, possible_positions
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
     pirate.setSignal(f"{id}")
@@ -418,6 +420,14 @@ def ActPirate(pirate):
             return moveTo(39-p[0], 39-p[1], pirate)
         else:
             return moveTo(38-p[0], 38-p[1], pirate)
+    if not reached_end and possible_positions:
+        if id%2 == 1:
+            possible_positions = dict(sorted(possible_positions.items(), key=lambda x: (x[1], x[0][0])))
+        else:
+            possible_positions = dict(sorted(possible_positions.items(), key=lambda x: (x[1], x[0][1])))
+        choice = list(possible_positions.keys())[0]
+        possible_positions[choice] += 1
+        return moveTo(choice[0], choice[1], pirate)
     if id%10 == 1:
         if p[0] == 0 and p[1] == 0:
             p[1] = 8
@@ -673,7 +683,16 @@ def ActPirate(pirate):
             return random.randint(1,4)
 
 def ActTeam(team):
-    global earlier_list_of_signals, assassins, gunPowder, wood, rum
+    global earlier_list_of_signals, assassins, gunPowder, wood, rum, possible_positions, reached_end
+    if not reached_end:
+        start_x, start_y = team.getDeployPoint()
+        positions_i_want = [(x, y) for x in range(39,-1,-1) for y in range(39,-1,-1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
+        # random.shuffle(positions_i_want)
+        # if (team.getCurrentFrame() % 2 == 0):
+        #     positions_i_want.reverse()
+        possible_positions = {key: 0 for key in positions_i_want}
+        if (39-start_x, 39-start_y) in possible_positions:
+            reached_end = True
 
     gunPowder = team.getTotalGunpowder()
     wood = team.getTotalWood()
