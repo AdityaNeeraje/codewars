@@ -1,13 +1,15 @@
 import random
 import math
 
+from numpy import sign
+
 from engine import island, pirate
 
 name = "script"
 
 # pirates_on_islands = 0
 
-deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values. # maximum length of 2
+# deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values. # maximum length of 2
 # colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 # pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
 # assassins = [] # Maximum length of 3
@@ -20,6 +22,32 @@ reached_end = False
 #     pos: 0 for pos in destination_visits
 # }
 # destinations_for_actors = {}
+
+def encode_direction(direction):
+    match(direction):
+        case "blank":
+            return 0
+        case "up":
+            return 1
+        case "down":
+            return 2
+        case "left":
+            return 3
+        case "right":
+            return 4
+        
+def decode_direction(direction):
+    match(direction):
+        case 0:
+            return "blank"
+        case 1:
+            return "up"
+        case 2:
+            return "down"
+        case 3:
+            return "left"
+        case 4:
+            return "right"
 
 def decode_signal(signal):
     signal_data = {
@@ -34,7 +62,8 @@ def decode_signal(signal):
             'island2': [],
             'island3': []   
         },
-        'assassins': []
+        'assassins': [],
+        'deploy_guards': {}
     }
 
     # Island positions...
@@ -49,6 +78,9 @@ def decode_signal(signal):
 
     # Assassins...
     signal_data['assassins'] = [int(ord(signal[6]) % (2**9) // (2**0)), int(ord(signal[7]) // (2**9)), int(ord(signal[7]) % (2**9) // (2**0))]
+
+    # Deploy guards...
+    signal_data['deploy_guards'] = [int(ord(signal[8]) // (2**9)), int(ord(signal[8]) % (2**9) // (2**0))]  
     return signal_data
 
 def encode_signal(signal_data):
@@ -69,6 +101,14 @@ def encode_signal(signal_data):
     # Assassins...          
     + (2**0)*int(assassins[0]))
     signal += chr((2**9)*int(assassins[1]) + (2**0)*int(assassins[2]))
+
+    # Deploy guards...
+    # signal += chr((2**9)*int(signal_data['deploy_guards'][0]) + (2**0)*int(signal_data['deploy_guards'][1]))
+    if len(signal_data['deploy_guards'].keys()) == 2:
+        signal += chr((2**9)*int(signal_data['deploy_guards'].keys()[0][0]) + (2**0)*int(signal_data['deploy_guards'].keys()[0][1]))
+        signal += chr((2**9)*int(signal_data['deploy_guards'].keys()[1][0]) + (2**0)*int(signal_data['deploy_guards'].keys()[1][1]))
+        signal += chr()
+
     return signal
 
 def ActAsGuard(x, y, pirate, dir_island):
@@ -266,7 +306,7 @@ def checkIsland(pirate, island_pos):
     if right[0][:-1] == "island" and ne[0][:-1] == "island" and se[0] == "blank" and up[0] == "blank" and down[0] == "blank":
         island_pos[right[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 1)
     if right[0][:-1] == "island" and se[0][:-1] == "island" and ne[0] == "blank" and up[0] == "blank" and down[0] == "blank":
-        island_pos[right[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 1)\
+        island_pos[right[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 1)
     
     return island_pos
 
@@ -567,7 +607,7 @@ def ActPirate(pirate):
     #     print(f'Colonists: {colonists}')
     #     # print(f'Ghosts: {}')
     #     return ActColonist(pirate)
-    
+    deploy_guards = signal_data['deploy_guards']
     if id in deploy_guards:
         return ActGuard(deploy_guards[id][0], deploy_guards[id][1], pirate, deploy_guards[id][2])
     
@@ -812,7 +852,8 @@ def ActPirate(pirate):
         return moveAway(x, y, pirate)
 
 def ActTeam(team):
-    global earlier_list_of_signals, gunPowder, wood, rum, possible_positions, reached_end, deploy_guards
+    global earlier_list_of_signals, gunPowder, wood, rum, possible_positions, reached_end
+    print(team.getTeamSignal())
     if team.getCurrentFrame() == 1:
         signal_data = {
             'island_pos': {
@@ -826,9 +867,11 @@ def ActTeam(team):
                 'island3': [2**9-1, 2**9-1, 2**9-1]
             },
             'assassins': [2**9-1, 2**9-1, 2**9-1],
+            'deploy_guards': {}
         }
     else:
         signal_data = decode_signal(team.getTeamSignal())
+    print(signal_data)
     signal = encode_signal(signal_data)
     island_pos = signal_data['island_pos']
     assassins = signal_data['assassins']
@@ -874,6 +917,7 @@ def ActTeam(team):
 
     start_x, start_y = team.getDeployPoint()
     colonists = signal_data['colonists']
+    deploy_guards = signal_data['deploy_guards']
     # print('a', colonists)
     list_of_signals = [x.split(',')[0] for x in team.getListOfSignals()]
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
