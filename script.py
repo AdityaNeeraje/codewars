@@ -2,6 +2,8 @@ import random
 import math
 import signal
 
+from pygame import init
+
 from engine import island, pirate
 
 name = "script"
@@ -13,7 +15,7 @@ island_pos = {
     'island3': (0, 0)
 }
 
-pirates_on_islands = 0
+# pirates_on_islands = 0
 
 deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
@@ -478,12 +480,17 @@ def ActPirate(pirate):
     global assassins, gunPowder, rum, wood, possible_positions, destinations_for_actors, destination_visits
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
-    pirate.setSignal(f"{id},{pirate.getPosition()[0]},{pirate.getPosition()[1]}")
+    print(f'Pirate Signal: {pirate.getSignal()}')
+    if pirate.getSignal().count(',') == 0:
+        pirate.setSignal(f"{id},{pirate.getPosition()[0]},{pirate.getPosition()[1]},{pirate.getCurrentFrame()}")
+        init_frame = pirate.getCurrentFrame()
+    else:
+        _, __x, __y, init_frame = pirate.getSignal().strip().split(',')
     dimensionX = pirate.getDimensionX()
     dimensionY = pirate.getDimensionY()
-    if pirate.getID() not in pirates:
+    if pirate.getID() not in pirates:   
        pirates[pirate.getID()] = [pirate.getCurrentFrame(), p[0], p[1]]
-    frame = pirate.getCurrentFrame() - pirates[str(id)][0]
+    frame = pirate.getCurrentFrame() - int(init_frame)
     curr_frame = pirate.getCurrentFrame()
     if id in assassins:
         if id == assassins[0]: #Instead, let actteam return the string a1 for the first assassin
@@ -498,15 +505,7 @@ def ActPirate(pirate):
 
     for island in colonists:
         if id in colonists[island]:
-            # print(f'Acting colonist {id} on {island}')
-            # print(f'Colonists: {colonists}')
-            # print(island_pos)
             return ActColonist(pirate)
-    # if id in :
-    #     print(f'Acting colonist')
-    #     print(f'Colonists: {colonists}')
-    #     # print(f'Ghosts: {}')
-    #     return ActColonist(pirate)
     
     if id in deploy_guards:
         return ActGuard(deploy_guards[id][0], deploy_guards[id][1], pirate, deploy_guards[id][2])
@@ -885,17 +884,17 @@ def ActTeam(team):
         pirate_id, x, y = signal.split(',')
         pirate_pos[int(pirate_id)] = (int(x), int(y))
 
-    pirates_on_islands = 0
-    for island in island_pos:
-        if island_pos[island] != (0, 0):
-            for pirate in pirate_pos:
-                print(pirate_pos[pirate])
-                # if pirate_pos[pirate][0] <= island_pos[0] + 1 and pirate_pos[0] >= island_pos[0] - 1 and pirate_pos[1] <= island_pos[1] + 1 and pirate_pos[1] >= island_pos[1] - 1:
-                if pirate_pos[pirate][0] <= island_pos[island][0] + 1 and pirate_pos[pirate][0] >= island_pos[island][0] - 1 and pirate_pos[pirate][1] <= island_pos[island][1] + 1 and pirate_pos[pirate][1] >= island_pos[island][1] - 1:
-                    pirates_on_islands += 1
-    print(f'Pirates on islands: {pirates_on_islands}')
-    print(island_pos)
-    print(colonists)
+    # pirates_on_islands = 0
+    # for island in island_pos:
+    #     if island_pos[island] != (0, 0):
+    #         for pirate in pirate_pos:
+    #             print(pirate_pos[pirate])
+    #             # if pirate_pos[pirate][0] <= island_pos[0] + 1 and pirate_pos[0] >= island_pos[0] - 1 and pirate_pos[1] <= island_pos[1] + 1 and pirate_pos[1] >= island_pos[1] - 1:
+    #             if pirate_pos[pirate][0] <= island_pos[island][0] + 1 and pirate_pos[pirate][0] >= island_pos[island][0] - 1 and pirate_pos[pirate][1] <= island_pos[island][1] + 1 and pirate_pos[pirate][1] >= island_pos[island][1] - 1:
+    #                 pirates_on_islands += 1
+    # print(f'Pirates on islands: {pirates_on_islands}')
+    # print(island_pos)
+    # print(colonists)
 
     start_x, start_y = team.getDeployPoint()
     list_of_signals = [x.split(',')[0] for x in team.getListOfSignals()]
