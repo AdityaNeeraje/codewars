@@ -774,6 +774,8 @@ def ActPirate(pirate):
         if id%8 == 1:
             return moveTo(random.randint(dimensionX//2-5,dimensionX//2+5), random.randint(max(0,p[1]-4), min(dimensionY-1,p[1]+4)), pirate)
         elif id%8 == 5:
+            print(max(0, p[0]-4), min(dimensionX-1, p[0]+4))
+            print(max(0,p[1]-4), min(dimensionY-1,p[1]+4))
             return moveTo(random.randint(max(0, p[0]-4), min(dimensionX-1, p[0]+4)), random.randint(dimensionY//2-5,dimensionY//2+5), pirate)
         elif id%4 == 2:
             return moveTo(dimensionX-1-random.randint(max(0, p[0]-4), min(dimensionX-1, p[0]+4)), random.randint(dimensionY//2-5,dimensionY//2+5), pirate)
@@ -781,6 +783,10 @@ def ActPirate(pirate):
             return moveTo(random.randint(dimensionX//2-5,dimensionX//2+5), dimensionY-1-random.randint(max(0,p[1]-4), min(dimensionY-1,p[1]+4)), pirate)
     if (frame%(dimensionX+dimensionY) < (dimensionX+dimensionY)//2 and frame%300 >= (dimensionX+dimensionY-2) and frame < 1500):
         if id%16 == 1:
+            print(max(0, p[0]-4), min(dimensionX-1, p[0]+4))
+            print(p[0], p[1])
+            print(dimensionX, dimensionY)
+            print(max(0,p[1]-4), min(dimensionY-1,p[1]+4))
             return moveTo(random.randint(max(0, p[0]-4), min(dimensionX-1, p[0]+4)), random.randint(max(0,p[1]-4), min(dimensionY-1,p[1]+4)), pirate)
         if id%4 == 2:
             return moveTo(dimensionX-1-random.randint(max(0, p[0]-4), min(dimensionX-1, p[0]+4)), random.randint(max(0,p[1]-4), min(dimensionY-1,p[1]+4)), pirate)

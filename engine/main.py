@@ -102,11 +102,11 @@ class Game:
         excluded = random.randint(0, 3)
 
         if excluded == 0 or excluded == 3:
-            base_red = (self.__dim[0]-1, 0)
-            base_blue = (0, self.__dim[1]-1)
+            base_red = (self.__dim[0] - 1, 0)
+            base_blue = (0, self.__dim[1] - 1)
         else:
             base_red = (0, 0)
-            base_blue = (self.__dim[0]-1, self.__dim[1]-1)
+            base_blue = (self.__dim[0] - 1, self.__dim[1] - 1)
 
         l = []
         for i in range(4):
