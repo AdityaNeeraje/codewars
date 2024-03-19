@@ -296,12 +296,14 @@ class GameState:
 current_game_state = GameState.START
 
 def ActColonist(pirate):
-    global pirate_pos, island_pos, colonists
+    global island_pos, colonists
     id = int(pirate.getID())
+    # print('Hey')
     for island in colonists:
         if id in colonists[island]:
             # print(f'Colonists: {colonists}')
             # print(f'Island: {island}')
+            # print(f'Acting Colonist {id} on {island}')
             if colonists[island][0] == id:
                 # if id not in pirate_pos:
                 #     print(f'Pirate dead: {id}')
@@ -535,6 +537,9 @@ def ActPirate(pirate):
     frame = pirate.getCurrentFrame() - pirates[str(id)][0]
     curr_frame = pirate.getCurrentFrame()
     if id in assassins:
+        # for island in colonists:
+            # if id in colonists[island]:
+            #     # print('HERE')
         if id == assassins[0]: #Instead, let actteam return the string a1 for the first assassin
             # print(dimensionX-1-p[0], dimensionY-2-p[1], pirate.getPosition())
             return moveTo(dimensionX-1-abs(p[0]-1), dimensionY-1-p[1], pirate)
@@ -546,10 +551,13 @@ def ActPirate(pirate):
             return moveTo(dimensionX-1-p[0], dimensionY-1-p[1], pirate)
 
     for island in colonists:
+        # print(type(colonists[island][0]))
+        # print(id, colonists[island])
         if id in colonists[island]:
             # print(f'Acting colonist {id} on {island}')
             # print(f'Colonists: {colonists}')
             # print(island_pos)
+            # print('HERE')
             return ActColonist(pirate)
     # if id in :
     #     print(f'Acting colonist')
@@ -943,6 +951,18 @@ def ActTeam(team):
     global earlier_list_of_signals, assassins, gunPowder, wood, rum, possible_positions, reached_end, deploy_guards
     dimensionX = team.getDimensionX()
     dimensionY = team.getDimensionY()
+    pirate_pos = dict()
+
+    pirate_signals = team.getListOfSignals()
+    for signal in pirate_signals:
+        print(signal)
+        if signal.count(',') != 3:
+            continue
+        # print(signal)
+        pirate_id, x, y, init_frame = signal.split(',')
+        # print(pirate_id, x, y, init_frame)
+        pirate_pos[int(pirate_id)] = (int(x), int(y), int(init_frame))
+
     if not reached_end:
         start_x, start_y = team.getDeployPoint()
         # for i in range(team.getCurrentFrame(),1,-1):
@@ -950,6 +970,7 @@ def ActTeam(team):
         #     possible_positions[i-1] = possible_positions[i-2].copy()
         possible_positions[team.getCurrentFrame()-1] = {(x, y): 0 for x in range(dimensionX) for y in range(dimensionY) if abs(start_x - x) + abs(start_y - y) == team.getCurrentFrame()}
         curr_positions = list(pirate_pos.values())
+        print(curr_positions)
         for i in range(team.getCurrentFrame()-1):
             possible_positions[i-1] = {(x,y): curr_positions.count((x,y)) for x in range(dimensionX) for y in range(dimensionY) if abs(start_x-x) + abs(start_y-y) == i}
         # positions_i_want = [(x, y) for x in range(39,-1,-1) for y in range(39,-1,-1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
