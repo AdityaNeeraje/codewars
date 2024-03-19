@@ -29,7 +29,7 @@ class Game:
         self.__sea = Group()
         self.__dim = dim
         self.__frame = 0
-        self.rate = 20
+        self.rate = 50
         self.explosion = pygame.image.load("images/explode.png")
         self.purple_pirate = pygame.image.load("images/piratepurple.png")
         self.screen = pygame.display.set_mode(
@@ -367,6 +367,7 @@ class Game:
             else:
                 self.time_up()
                 break
+        print("Game Over")
                 # winner window
 
     def discovery(self):

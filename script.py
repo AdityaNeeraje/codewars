@@ -2,52 +2,78 @@ import random
 import math
 import signal
 
+from jwt import decode
+from numpy import sign
 from pygame import init
 
 from engine import island, pirate
 
 name = "script"
 
-# Into the team signal
-island_pos = {
-    'island1': (0, 0),
-    'island2': (0, 0),
-    'island3': (0, 0)
-}
-
 # pirates_on_islands = 0
 
-deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
-colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
-pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
-assassins = []
+deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values. # maximum length of 2
+# colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
+# pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
+# assassins = [] # Maximum length of 3
 earlier_list_of_signals = []
 possible_positions = {id: {} for id in range(78)} # subtract frame from the current frame to get the id number (maybe +1)
 reached_end = False
-destination_visits = [(x, y) for x in range(40) for y in range(40)]
-random.shuffle(destination_visits)
-destination_visits = {
-    pos: 0 for pos in destination_visits
-}
-destinations_for_actors = {}
+# destination_visits = [(x, y) for x in range(40) for y in range(40)]
+# random.shuffle(destination_visits)
+# destination_visits = {
+#     pos: 0 for pos in destination_visits
+# }
+# destinations_for_actors = {}
 
-# Our resources
-gunPowder = 0
-rum = 0
-wood = 0
+def decode_signal(signal):
+    signal_data = {
+        'island_pos': {
+            'island1': (0, 0),
+            'island2': (0, 0),
+            'island3': (0, 0)
+        },
+        # Make this a set...
+        'colonists': {
+            'island1': [],
+            'island2': [],
+            'island3': []   
+        },
+        'assassins': []
+    }
 
-# pirate_pos = dict()
-pirate_goal = dict()
-island_pos = dict()
+    # Island positions...
+    signal_data['island_pos']['island1'] = (ord(signal[0]) // (2**12), (ord(signal[0]) % (2**12)) // (2**6))
+    signal_data['island_pos']['island2'] = ((ord(signal[0]) % (2**12)) % (2**6) // (2**0), (ord(signal[1]) // (2**12)))
+    signal_data['island_pos']['island3'] = ((ord(signal[1]) % (2**12)) // (2**6), (ord(signal[1]) % (2**12)) % (2**6) // (2**0))
 
-def sig_decode(signal:str):
-    dec_data = dict()
-    # Encode string to bytes
-    byte_data = signal.encode('utf-8')
-    # Convert bytes to binary string
-    binary_str = ''.join(format(byte, '08b') for byte in byte_data)
-    return binary_str
-    pass
+    # Colonists...
+    signal_data['colonists']['island1'] = [int(ord(signal[2]) // (2**9)), int(ord(signal[2]) % (2**9) // (2**0)), int(ord(signal[3]) // (2**9))]
+    signal_data['colonists']['island2'] = [int(ord(signal[3]) % (2**9) // (2**0)), int(ord(signal[4]) // (2**9)), int(ord(signal[4]) % (2**9) // (2**0))]
+    signal_data['colonists']['island3'] = [int(ord(signal[5]) // (2**9)), int(ord(signal[5]) % (2**9) // (2**0)), int(ord(signal[6]) // (2**9))]
+
+    # Assassins...
+    signal_data['assassins'] = [int(ord(signal[6]) % (2**9) // (2**0)), int(ord(signal[7]) // (2**9)), int(ord(signal[7]) % (2**9) // (2**0))]
+    return signal_data
+
+def encode_signal(signal_data):
+    signal = ""
+    assassins = signal_data['assassins']
+    # Island positions...
+    signal += chr((2**12)*signal_data['island_pos']['island1'][0] + (2**6)*signal_data['island_pos']['island1'][1] + (2**0)*signal_data['island_pos']['island2'][0])
+    signal += chr((2**12)*signal_data['island_pos']['island2'][1] + (2**6)*signal_data['island_pos']['island3'][0] + (2**0)*signal_data['island_pos']['island3'][1])
+
+    # Colonists and Assassin...
+    signal += chr((2**9)*int(signal_data['colonists']['island1'][0]) + (2**0)*int(signal_data['colonists']['island1'][1]))
+    signal += chr((2**9)*int(signal_data['colonists']['island1'][2]) + (2**0)*int(signal_data['colonists']['island2'][0]))
+    signal += chr((2**9)*int(signal_data['colonists']['island2'][1]) + (2**0)*int(signal_data['colonists']['island2'][2]))
+    signal += chr((2**9)*int(signal_data['colonists']['island3'][0]) + (2**0)*int(signal_data['colonists']['island3'][1]))
+    signal += chr((2**9)*int(signal_data['colonists']['island3'][2])\
+    
+    # Assassins...          
+    + (2**0)*int(assassins[0]))
+    signal += chr((2**9)*int(assassins[1]) + (2**0)*int(assassins[2]))
+    return signal
 
 def ActAsGuard(x, y, pirate, dir_island):
     up = pirate.investigate_up()[1]
@@ -172,24 +198,15 @@ def circleAround(x, y, radius, Pirate, initial="abc", clockwise=True):
         )
 
 # Check if a pirate is next to an island
-def checkIsland(pirate):
-    global island_pos
-    if 'island1' not in island_pos:
-        island_pos['island1'] = (0, 0)
-    if 'island2' not in island_pos:
-        island_pos['island2'] = (0, 0)
-    if 'island3' not in island_pos:
-        island_pos['island3'] = (0, 0)
-    # print(island_pos)
+def checkIsland(pirate, island_pos):
+
     up = pirate.investigate_up()
     down = pirate.investigate_down()
     left = pirate.investigate_left()
     right = pirate.investigate_right()
+
     if island_pos['island1'] != (0, 0) and island_pos['island2'] != (0, 0) and island_pos['island3'] != (0, 0):
-        if (up[0:-1] == "island" or down[0:-1] == "island") and (left[0:-1] == "island" or right[0:-1] == "island"):
-            return True
-        else:
-            return False
+        return island_pos
 
     nw = pirate.investigate_nw()
     ne = pirate.investigate_ne()
@@ -197,28 +214,20 @@ def checkIsland(pirate):
     sw = pirate.investigate_sw()
 
     if nw[0][0:-1] == "island" and up[0] == "blank" and left[0] == "blank":
-        # print('Hello!!!')
         island_pos[nw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] - 2)
     if ne[0][0:-1] == "island" and up[0] == "blank" and right[0] == "blank":
-        # print('Hello!!!')
         island_pos[ne[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 2)
     if se[0][0:-1] == "island" and down[0] == "blank" and right[0] == "blank":
-        # print('Hello!!!')
         island_pos[se[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 2)
     if sw[0][0:-1] == "island" and down[0] == "blank" and left[0] == "blank":
-        # print('Hello!!!')
         island_pos[sw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] + 2)
     if up[0][0:-1] == "island" and nw[0][0:-1] == "island" and ne[0][0:-1] == "island" and right[0] == "blank" and left[0] == "blank":
-        # print('Hello!!!')
         island_pos[up[0]] = (pirate.getPosition()[0], pirate.getPosition()[1] - 2)
     if left[0][0:-1] == "island" and nw[0][0:-1] == "island" and sw[0][0:-1] == "island" and up[0] == "blank" and down[0] == "blank":
-        # print('Hello!!!')
         island_pos[left[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1])
     if down[0][0:-1] == "island" and sw[0][0:-1] == "island" and se[0][0:-1] == "island" and right[0] == "blank" and left[0] == "blank":
-        # print('Hello!!!')
         island_pos[down[0]] = (pirate.getPosition()[0], pirate.getPosition()[1] + 2)
     if right[0][0:-1] == "island" and ne[0][0:-1] == "island" and se[0][0:-1] == "island" and up[0] == "blank" and down[0] == "blank":
-        # print('Hello!!!')
         island_pos[right[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1])
     if up[0][:-1] == "island" and nw[0][:-1] == "island" and ne[0] == "blank" and left[0] == "blank" and right[0] == "blank":
         island_pos[up[0]] = (pirate.getPosition()[0] - 1, pirate.getPosition()[1] - 2)
@@ -236,40 +245,12 @@ def checkIsland(pirate):
         island_pos[right[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 1)
     if right[0][:-1] == "island" and se[0][:-1] == "island" and ne[0] == "blank" and up[0] == "blank" and down[0] == "blank":
         island_pos[right[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 1)\
+    
+    return island_pos
 
-    # if ne[0:-1] == "island" and up[0:-1] == "blank" and right[0:-1] == "blank":
-    #     print('Hello!!!')
-    #     island_pos[ne[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] - 2)
-    # if se[0:-1] == "island" and down[0:-1] == "blank" and right[0:-1] == "blank":
-    #     print('Hello!!!')
-    #     island_pos[se[0]] = (pirate.getPosition()[0] + 2, pirate.getPosition()[1] + 2)
-    # if sw[0:-1] == "island" and down[0:-1] == "blank" and left[0:-1] == "blank":
-    #     print('Hello!!!')
-    #     island_pos[sw[0]] = (pirate.getPosition()[0] - 2, pirate.getPosition()[1] + 2)
-    # if up[0:-1] == "island" and nw[0:-1] == "island" and ne[0:-1] == "island":
-    #     print('Hello!!!')
-    #     island_pos[up[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]-2)
-    # if left[0:-1] == "island" and nw[0:-1] == "island" and sw[0:-1] == "island":
-    #     print('Hello!!!')
-    #     island_pos[left[0]] = (pirate.getPosition()[0]-2, pirate.getPosition()[1])
-    # if down[0:-1] == "island" and sw[0:-1] == "island" and se[0:-1] == "island":
-    #     print('Hello!!!')
-    #     island_pos[down[0]] = (pirate.getPosition()[0], pirate.getPosition()[1]+2)
-    # if right[0:-1] == "island" and ne[0:-1] == "island" and se[0:-1] == "island":
-    #     print('Hello!!!')
-    #     island_pos[right[0]] = (pirate.getPosition()[0]+2, pirate.getPosition()[1])
-    # print(island_pos)
-
-
-    if (up[0:-1] == "island" or down[0:-1] == "island") and (left[0:-1] == "island" or right[0:-1] == "island"):
-        return True
-    else:
-        return False
-
-def ActColonist(pirate):
-    global island_pos, colonists
+def ActColonist(pirate, island_pos, colonists):
     id = int(pirate.getID())
-    # print('Hey')
+    print('Hey')
     for island in colonists:
         if id in colonists[island]:
             # print(f'Acting Colonist {id} on {island}')
@@ -279,7 +260,6 @@ def ActColonist(pirate):
                 return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] + 1, island_pos[island][1] + 1))
             else:
                 return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] - 1, island_pos[island][1] - 1))
-    pass
 
 def update_game_state(team):
     global current_game_state
@@ -301,8 +281,6 @@ def check_game_state():
 
 # Get the closest n pirates to a given position
 def closest_n_pirates(x, y, n, pirate_pos):
-    # pirates = pirate_pos.keys()
-    # pirates.sort(key=lambda p: abs(p.getPosition()[0] - x) + abs(p.getPosition()[1] - y))
     pirates = {k: v for k, v in sorted(pirate_pos.items(), key=lambda item: abs(item[1][0] - x) + abs(item[1][1] - y))}
     return list(pirates.keys())[:n]
 
@@ -479,10 +457,17 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global assassins, gunPowder, rum, wood, possible_positions, destinations_for_actors, destination_visits
+    global possible_positions, destinations_for_actors, destination_visits
+    gunPowder = pirate.getTotalGunpowder()
+    rum = pirate.getTotalRum()
+    wood = pirate.getTotalWood()
+    signal_data = decode_signal(pirate.getTeamSignal())
+
+    island_pos = signal_data['island_pos']
+    colonists = signal_data['colonists']
+    assassins = signal_data['assassins']
     p = list(pirate.getDeployPoint())
     id = int(pirate.getID())
-    # print(f'Pirate Signal: {pirate.getSignal()}')
     if pirate.getSignal().count(',') == 0:
         pirate.setSignal(f"{id},{pirate.getPosition()[0]},{pirate.getPosition()[1]},{pirate.getCurrentFrame()}")
         init_frame = pirate.getCurrentFrame()
@@ -491,14 +476,12 @@ def ActPirate(pirate):
         pirate.setSignal(f"{id},{pirate.getPosition()[0]},{pirate.getPosition()[1]},{init_frame}")
     dimensionX = pirate.getDimensionX()
     dimensionY = pirate.getDimensionY()
-    if pirate.getID() not in pirates:   
-       pirates[pirate.getID()] = [pirate.getCurrentFrame(), p[0], p[1]]
+    # if pirate.getID() not in pirates:
+    #     pirates[pirate.getID()] = [pirate.getCurrentFrame(), p[0], p[1]]
+    print(assassins)
     frame = pirate.getCurrentFrame() - int(init_frame)
     curr_frame = pirate.getCurrentFrame()
     if id in assassins:
-        # for island in colonists:
-            # if id in colonists[island]:
-            #     # print('HERE')
         if id == assassins[0]: #Instead, let actteam return the string a1 for the first assassin
             # print(dimensionX-p[0], dimensionY-1-p[1], pirate.getPosition())
             return moveTo(dimensionX-1-p[0], dimensionY-2-p[1], pirate)
@@ -508,18 +491,22 @@ def ActPirate(pirate):
             return moveTo(dimensionY-1-p[0], dimensionX-1-p[1], pirate)
         else:
             return moveTo(dimensionX-2-p[0], dimensionY-2-p[1], pirate)
-
+    # print(colonists)
     for island in colonists:
         # print(type(colonists[island][0]))
         # print(id, colonists[island])
+        # print('Hey')
         if id in colonists[island]:
             # print('HERE')
-            return ActColonist(pirate)
+            return ActColonist(pirate, island_pos, colonists)
     
     if id in deploy_guards:
         return ActGuard(deploy_guards[id][0], deploy_guards[id][1], pirate, deploy_guards[id][2])
     
-    checkIsland(pirate=pirate)
+    island_pos = checkIsland(pirate, island_pos)
+
+    signal_data['island_pos'] = island_pos
+    pirate.setTeamSignal(encode_signal(signal_data))
 
     if not reached_end and possible_positions:
         index = abs(pirate.getPosition()[0]-pirate.getDeployPoint()[0]) + abs(pirate.getPosition()[1]-pirate.getDeployPoint()[1])
@@ -622,58 +609,9 @@ def ActPirate(pirate):
             p[0] = 7
         elif p[0] == 39 and p[1] == 0:
             p[1] = 32    
-            
 
     if frame > 600:
-        # print("HERE")
         p = pirate.getDeployPoint()
-    # if (frame < 75):
-    #     return moveTo(39-p[0], 39-p[1], pirate)
-    # if (frame%234 < 182 and frame%26 != 0 and frame < 2000):
-    #     if destinations_for_actors.get(id) is not None:
-    #         return moveTo(destinations_for_actors[id][0], destinations_for_actors[id][1], pirate)
-    #     else:
-    #         destination_probabilities = dict(sorted(destination_visits.items(), key=lambda x: x[1]))
-    #         destinations = list(destination_probabilities.keys())
-    #         # print (abs(destinations[0][0] - 24)+abs(destinations[0][1]- 24))
-    #         # while abs(destinations[-1][0] - pirate.getPosition()[0]) + abs(destinations[-1][1] - pirate.getPosition()[1]) < 30:
-    #         #     destinations.pop()
-    #         if (pirate.getPosition()[0] < 20 and pirate.getPosition()[1] < 20):
-    #             destinations_for_actors[id] = (random.randint(0,19), random.randint(0,19))
-    #         elif (pirate.getPosition()[0] >= 20 and pirate.getPosition()[1] > 20):
-    #             destinations_for_actors[id] = (random.randint(20,39), random.randint(20,39))
-    #         elif (pirate.getPosition()[0] < 20 and pirate.getPosition()[1] > 20):
-    #             destinations_for_actors[id] = (random.randint(0,39), random.randint(20,39))
-    #         else:
-    #             destinations_for_actors[id] = (random.randint(20,39), random.randint(0,19))
-    #         # destinations_for_actors[id] = (random.randint(0,36), random.randint(0,36))
-    #         print(destinations_for_actors[id])
-    #         destination_visits[destinations_for_actors[id]] += 1
-    #         # print(True)
-    #         return moveTo(destinations_for_actors[id][0], destinations_for_actors[id][1], pirate)
-    # if (frame%26 == 0 and frame < 2000):
-    #     destinations_for_actors = {}
-    #     try:
-    #         if max(destination_visits.values()) > 0 and frame%52 == 0:
-    #             destinations_to_visit = [(x, y) for x in range(40) for y in range(40)]
-    #             random.shuffle(destinations_to_visit)
-    #             destination_visits = {
-    #                 pos: 0 for pos in destinations_to_visit
-    #             }
-    #     except:
-    #         pass
-    # if(frame % 234 >= 182 and frame < 2000):
-    #     # print(False)
-    # # if (frame%600 < 300 and frame < 1000):
-    #     width = 2
-    #     if id%16 == 1:
-    #         return moveTo(random.randint(max(0,p[0]-width),min(p[0]+width,39)), random.randint(max(0,p[1]-width),min(p[1]+width,39)), pirate)
-    #     elif id%4 == 2:
-    #         return moveTo(random.randint(max(0,p[0]-width),min(p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
-    #     elif id%4 == 3:
-    #         return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,p[1]-width),min(p[1]+width,39)), pirate)
-    #     else:
-    #         return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
     if(frame % (dimensionX+dimensionY) >= (dimensionX+dimensionY)//2 and frame%300 >= (dimensionX+dimensionY-2) and frame < 1500):
         if id%8 == 1:
             return moveTo(random.randint(dimensionX//2-5,dimensionX//2+5), random.randint(max(0,p[1]-4), min(dimensionY-1,p[1]+4)), pirate)
@@ -705,147 +643,29 @@ def ActPirate(pirate):
         right = pirate.investigate_right()
         x, y = pirate.getPosition()
         return moveAway(x, y, pirate)
-        # pirate.setSignal("")
-        # s = pirate.trackPlayers()
-        
-        # if (
-        #     (up == "island1" and s[0] != "myCaptured")
-        #     or (up == "island2" and s[1] != "myCaptured")
-        #     or (up == "island3" and s[2] != "myCaptured")
-        # ):
-        #     s = up[-1] + str(x) + "," + str(y - 1)
-        #     b += 1
-        #     pirate.setSignal("mid")
-
-        # if (
-        #     (down == "island1" and s[0] != "myCaptured")
-        #     or (down == "island2" and s[1] != "myCaptured")
-        #     or (down == "island3" and s[2] != "myCaptured")
-        # ):
-        #     s = down[-1] + str(x) + "," + str(y + 1)
-        #     b += 1
-        #     pirate.setSignal("mid")
-
-        # if (
-        #     (left == "island1" and s[0] != "myCaptured")
-        #     or (left == "island2" and s[1] != "myCaptured")
-        #     or (left == "island3" and s[2] != "myCaptured")
-        # ):
-        #     s = left[-1] + str(x - 1) + "," + str(y)
-        #     b += 1
-
-        #     pirate.setSignal("mid")
-
-
-        # if (
-        #     (right == "island1" and s[0] != "myCaptured")
-        #     or (right == "island2" and s[1] != "myCaptured")
-        #     or (right == "island3" and s[2] != "myCaptured")
-        # ):
-        #     s = right[-1] + str(x + 1) + "," + str(y)
-        #     b += 1
-        #     pirate.setSignal("mid")
-
-
-        # if (
-        #     (up == "island1" and s[0] == "myCaptured")
-        #     or (up == "island2" and s[1] == "myCaptured")
-        #     or (up == "island3" and s[2] == "myCaptured") 
-        # ):
-        #     pirate.setSignal("mid")
-
-        # if (
-        #     (right == "island1" and s[0] == "myCaptured")
-        #     or (right == "island2" and s[1] == "myCaptured")
-        #     or (right == "island3" and s[2] == "myCaptured") 
-        # ):
-        #     # pirate.SetTeamSignal(s)
-        #     pirate.setSignal("mid")
-
-        # if (
-        #     (down == "island1" and s[0] == "myCaptured")
-        #     or (down == "island2" and s[1] == "myCaptured")
-        #     or (down == "island3" and s[2] == "myCaptured") 
-        # ):
-        #     s = down[-1] + str(x) + "," + str(y + 1)
-        #     pirate.setSignal("mid")
-
-
-        # if (
-        #         (left == "island1" and s[0] == "myCaptured")
-        #         or (left == "island2" and s[1] == "myCaptured")
-        #         or (left == "island3" and s[2] == "myCaptured") 
-        #     ):
-        #         pirate.setSignal("mid")
-
-        # if (up == "friend"):
-        #     if checkIsland(pirate) and b<= 4:
-        #         pirate.setSignal("mid")
-        #     else:
-        #         s = up[-1] + str(x) + "," + str(y + 1)
-        #         pirate.setSignal("move")
-        
-        # if (down == "friend"):
-        #     if checkIsland(pirate) and b<= 4:
-        #         pirate.setSignal("mid")
-        #     else:
-        #         s = up[-1] + str(x) + "," + str(y - 1)
-        #         pirate.setSignal("move")
-        
-        # if (left == "friend"):
-        #     if checkIsland(pirate) and b<= 4:
-        #         pirate.setSignal("mid")
-        #     else:
-        #         s = up[-1] + str(x - 1) + "," + str(y)
-        #         pirate.setSignal("move")
-        
-        # if (right == "friend" ) :
-        #     if checkIsland(pirate) and b<= 4:
-        #         pirate.setSignal("mid")
-        #     else:
-        #         s = up[-1] + str(x + 1) + "," + str(y)
-        #         pirate.setSignal("move")
-
-        # if (up != "friend" and up != "enemy" ):
-        #     if checkIsland(pirate) and b<= 4:
-        #         pirate.setSignal("mid")
-        #     else:
-        #         pirate.setSignal("random")
-        
-        # if (down != "friend" and down != "enemy"):
-        #     if checkIsland(pirate) and b<= 4:
-        #         pirate.setSignal("mid")
-        #     else:
-        #         pirate.setSignal("random")
-        
-        # if (left != "friend" and left != "enemy" ):
-        #     if checkIsland(pirate) and b<= 4:
-        #         pirate.setSignal("mid")
-        #     else:
-        #         pirate.setSignal("random")
-        
-        # if (right != "friend" and right != "enemy"):
-        #     if checkIsland(pirate) and b<= 4:
-        #         pirate.setSignal("mid")
-        #     else:
-        #         pirate.setSignal("random")
-
-        # if pirate.getSignal() =="mid":
-        #     return 0
-
-        # elif pirate.getSignal() == "move":
-        #     s = pirate.getTeamSignal()
-        #     l = s.split(",")
-        #     x = int(l[0][1:])
-        #     y = int(l[1])
-        #     return moveTo(x, y, pirate)
-        
-        # elif pirate.getSignal() == "random":
-        #     return random.randint(1,4)
 
 def ActTeam(team):
-    global earlier_list_of_signals, assassins, gunPowder, wood, rum, possible_positions, reached_end, deploy_guards
-    encode_signal(team, island_pos)
+    global earlier_list_of_signals, gunPowder, wood, rum, possible_positions, reached_end, deploy_guards
+    if team.getCurrentFrame() == 1:
+        signal_data = {
+            'island_pos': {
+                'island1': (0, 0),
+                'island2': (0, 0),
+                'island3': (0, 0)
+            },
+            'colonists': {
+                'island1': [2**9-1, 2**9-1, 2**9-1],
+                'island2': [2**9-1, 2**9-1, 2**9-1],
+                'island3': [2**9-1, 2**9-1, 2**9-1]
+            },
+            'assassins': [2**9-1, 2**9-1, 2**9-1],
+        }
+    else:
+        signal_data = decode_signal(team.getTeamSignal())
+    signal = encode_signal(signal_data)
+    island_pos = signal_data['island_pos']
+    assassins = signal_data['assassins']
+    team.setTeamSignal(signal)
     dimensionX = team.getDimensionX()
     dimensionY = team.getDimensionY()
     if not reached_end:
@@ -877,12 +697,6 @@ def ActTeam(team):
     gunPowder = team.getTotalGunpowder()
     wood = team.getTotalWood()
     rum = team.getTotalRum()
-    if 'island1' not in island_pos:
-        island_pos['island1'] = (0, 0)
-    if 'island2' not in island_pos:
-        island_pos['island2'] = (0, 0)
-    if 'island3' not in island_pos:
-        island_pos['island3'] = (0, 0)
 
     pirate_pos = dict()
 
@@ -890,24 +704,11 @@ def ActTeam(team):
     for signal in pirate_signals:
         if signal.count(',') != 3:
             continue
-        # print(signal)
         pirate_id, x, y, init_frame = signal.split(',')
-        # print(pirate_id, x, y, init_frame)
         pirate_pos[int(pirate_id)] = (int(x), int(y), int(init_frame))
 
-    # pirates_on_islands = 0
-    # for island in island_pos:
-    #     if island_pos[island] != (0, 0):
-    #         for pirate in pirate_pos:
-    #             print(pirate_pos[pirate])
-    #             # if pirate_pos[pirate][0] <= island_pos[0] + 1 and pirate_pos[0] >= island_pos[0] - 1 and pirate_pos[1] <= island_pos[1] + 1 and pirate_pos[1] >= island_pos[1] - 1:
-    #             if pirate_pos[pirate][0] <= island_pos[island][0] + 1 and pirate_pos[pirate][0] >= island_pos[island][0] - 1 and pirate_pos[pirate][1] <= island_pos[island][1] + 1 and pirate_pos[pirate][1] >= island_pos[island][1] - 1:
-    #                 pirates_on_islands += 1
-    # print(f'Pirates on islands: {pirates_on_islands}')
-    # print(island_pos)
-    # print(colonists)
-
     start_x, start_y = team.getDeployPoint()
+    colonists = signal_data['colonists']
     list_of_signals = [x.split(',')[0] for x in team.getListOfSignals()]
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
     dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals] 
@@ -935,6 +736,7 @@ def ActTeam(team):
     # print(island_pos)
     if len(assassins) < 6 and len(list_of_signals) >= 5:
         assassins = closest_n_pirates(dimensionX-1-start_x, dimensionY-1-start_y, 5, pirate_pos)
+    print(assassins)
     if team.getCurrentFrame() > dimensionX and len(deploy_guards) < 2 and len(list_of_signals) >= 2:
         # print(closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, team))
         # print(closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, team)[1:])
@@ -976,4 +778,6 @@ def ActTeam(team):
             deploy_guards[deployed_guards[1]][1] = dimensionY-2
             deploy_guards[deployed_guards[1]][2] = 'up'
     earlier_list_of_signals = list_of_signals.copy()
-    pass
+    signal = encode_signal(signal_data)
+    team.setTeamSignal(signal)
+    # print(signal_data)
