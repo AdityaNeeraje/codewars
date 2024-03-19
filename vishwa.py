@@ -158,6 +158,7 @@ def ActPirate(pirate):
             strp = str(xchange+2)+str(ychange+2)
             pirate.setSignal(strp)
         # print(f"{xchange},{ychange}")
+        print(xchange, ychange)
         return moveTo(x+xchange,y+ychange,pirate)
 
     if pirate.getTeamSignal() != "":

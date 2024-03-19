@@ -17,6 +17,7 @@ gunpowder = 0
 rum = 0
 wood = 0
 
+signals = {}
 deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 pirates = {} # This has the id of every living pirate as a key and the generating frame and coordinates as values
@@ -537,7 +538,7 @@ def ActPirate(pirate):
        pirates[pirate.getID()] = [pirate.getCurrentFrame(), p[0], p[1]]
     frame = pirate.getCurrentFrame() - pirates[str(id)][0]
     curr_frame = pirate.getCurrentFrame()
-    if id in assassins:
+    if id in assassins and frame < 500:
         # print(assassins.index(id))
         # for island in colonists:
             # if id in colonists[island]:
@@ -781,7 +782,46 @@ def ActPirate(pirate):
     #         return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,p[1]-width),min(p[1]+width,39)), pirate)
     #     else:
     #         return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
+        if signals.get(id) is None:
+            signals[id] = ""
+        x,y = pirate.getPosition()
+        strp = signals[id]
+        # print(strp)
+        if(strp != ''):
+            try:
+                xchange =int(strp[0])-2
+                ychange = int(strp[1])-2
+            except:
+                xchange=1
+                ychange=1
+        else:
+            xchange=1
+            ychange=1
+        if x==pirate.getDimensionX()-1:
+            xchange = -1
+            strp = str(xchange+2)+str(ychange+2)
+            signals[id] = strp
+            # print(strp)
+            # print("rchd end")
+        elif x==0:
+            xchange = 1
+            strp = str(xchange+2)+str(ychange+2)
+            signals[id] = strp
+        if y== 0:
+            ychange = 1
+            strp = str(xchange+2)+str(ychange+2)
+            signals[id] = strp
+        elif y == pirate.getDimensionY()-1:
+            ychange = -1
+            strp = str(xchange+2)+str(ychange+2)
+            signals[id] = strp
+        # print(f"{xchange},{ychange}")
+        return moveTo(x+xchange,y+ychange,pirate)
+
+
+    #Start uncommenting from HERE    
     if(frame % (dimensionX+dimensionY) >= (dimensionX+dimensionY)//2 and frame%300 >= (dimensionX+dimensionY-2) and frame < 1500):
+        # print("HERE")
         if id%8 == 1:
             return moveTo(random.randint(dimensionX//2-5,dimensionX//2+5), random.randint(max(0,p[1]-4), min(dimensionY-1,p[1]+4)), pirate)
         elif id%8 == 5:
@@ -791,6 +831,7 @@ def ActPirate(pirate):
         else:
             return moveTo(random.randint(dimensionX//2-5,dimensionX//2+5), dimensionY-1-random.randint(max(0,p[1]-4), min(dimensionY-1,p[1]+4)), pirate)
     if (frame%(dimensionX+dimensionY) < (dimensionX+dimensionY)//2 and frame%300 >= (dimensionX+dimensionY-2) and frame < 1500):
+        # print("HERE")
         if id%16 == 1:
             return moveTo(random.randint(max(0, p[0]-4), min(dimensionX-1, p[0]+4)), random.randint(max(0,p[1]-4), min(dimensionY-1,p[1]+4)), pirate)
         if id%4 == 2:
@@ -800,9 +841,11 @@ def ActPirate(pirate):
         else:
             return moveTo(dimensionX-1-random.randint(max(0, p[0]-4), min(dimensionX-1, p[0]+4)), dimensionY-1-random.randint(max(0,p[1]-4), min(dimensionY-1,p[1]+4)), pirate)
         # return moveTo(random.randint(17, 23), random.randint(17, 23), pirate)
-    if (frame % 80 < 40 and 500 <= frame < 2000):
+    if (frame % 80 < 40 and frame < 2000):
+        # print("DOING THIS")
         return moveTo(39-p[0], p[1], pirate)
-    elif frame % 80 > 40 and 500 <= frame < 2000:
+    elif frame % 80 > 40 and frame < 2000:
+        # print("DOING THIS")
         return moveTo(p[0], 39-p[1], pirate)
     else:
         # print("HERE3")
@@ -811,7 +854,9 @@ def ActPirate(pirate):
         left = pirate.investigate_left()
         right = pirate.investigate_right()
         x, y = pirate.getPosition()
-        return moveAway(x, y, pirate)
+        # print("WE ARE AT SPREAD", frame)
+        return spread(pirate)
+    # END UNCOMMENTING HERE
         # pirate.setSignal("")
         # s = pirate.trackPlayers()
         
