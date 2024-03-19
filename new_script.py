@@ -1050,12 +1050,6 @@ def ActTeam(team):
         for key in colonists:
             if id in colonists[key]:
                 colonists[key].remove(id)
-    if len(list_of_signals) < 15:
-        for key in colonists:
-            try:
-                colonists[key] = colonists[key][:1]
-            except:
-                pass
     for i in range(1, 4):
         if island_pos[f'island{i}'] != (0, 0):
             colonists[f'island{i}'] = closest_n_pirates(island_pos[f'island{i}'][0], island_pos[f'island{i}'][1], 3, team)
@@ -1066,9 +1060,7 @@ def ActTeam(team):
 
 
     if len(assassins) < 3 and len(list_of_signals) >= 3:
-        print("REPLENISHING")
         assassins = closest_n_pirates(dimensionX-1-start_x, dimensionY-1-start_y, 3, team)
-        print(assassins)
     if team.getCurrentFrame() > dimensionX and len(deploy_guards) < 2 and len(list_of_signals) >= 2:
         # print(closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, team))
         # print(closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, team)[1:])

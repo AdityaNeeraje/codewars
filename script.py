@@ -1110,7 +1110,7 @@ def ActTeam(team):
     if len(list_of_signals) < 15:
         for key in colonists:
             try:
-                colonists[key] = colonists[key][:1]
+                colonists[key] = [colonists[key][0]]
             except:
                 pass
 
