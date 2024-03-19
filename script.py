@@ -3,7 +3,7 @@ import math
 
 from engine import island, pirate
 
-name = "new_script"
+name = "script"
 
 island_pos = {
     'island1': (0, 0),
@@ -299,30 +299,46 @@ current_game_state = GameState.START
 def ActColonist(pirate):
     global island_pos, colonists
     id = int(pirate.getID())
-    # print('Hey')
     for island in colonists:
         if id in colonists[island]:
-            # print(f'Colonists: {colonists}')
-            # print(f'Island: {island}')
-            # print(f'Acting Colonist {id} on {island}')
-            if colonists[island][0] == id:
-                # if id not in pirate_pos:
-                #     print(f'Pirate dead: {id}')
-                # print(f'Colonist {id} on {island} and moving to {island_pos[island]}')
+            position_of_first_colonist = positionInIsland(pirate)
+            # centre, topleft, topright, bottomright, bottomleft, middleright, middleleft, topmiddle, bottommiddle
+            investigation_result = ""
+            if position_of_first_colonist == 'topleft':
+                investigation_result = pirate.investigate_se()
+            elif position_of_first_colonist == 'topright':
+                investigation_result = pirate.investigate_sw()
+            elif position_of_first_colonist == 'bottomright':
+                investigation_result = pirate.investigate_nw()
+            elif position_of_first_colonist == 'bottomleft':
+                investigation_result = pirate.investigate_ne()
+            elif position_of_first_colonist == 'bottommiddle':
+                investigation_result = pirate.investigate_top()
+            elif position_of_first_colonist == 'topmiddle':
+                investigation_result = pirate.investigate_down()
+            elif position_of_first_colonist == 'middleright':
+                investigation_result = pirate.investigate_left()
+            elif position_of_first_colonist == 'middleleft':
+                investigation_result = pirate.investigate_right()
+            if investigation_result == "enemy":
                 return moveTo(island_pos[island][0], island_pos[island][1], pirate)
-            elif colonists[island][1] == id:
-                # if id not in pirate_pos:
-                #     print(f'Pirate dead: {id}')
-                # print(f'Colonist {id} on {island} and moving to {(island_pos[island][0] + 1, island_pos[island][1] + 1)}')
-                # return moveTo(island_pos[island][0] + 1, island_pos[island][1] + 1, pirate)
-                return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] + 1, island_pos[island][1] + 1))
-            else:
-                # if id not in pirate_pos:
-                #     print(f'Pirate dead: {id}')
-                # print(f'Colonist {id} on {island} and moving to {(island_pos[island][0] - 1, island_pos[island][1] - 1)}')
-                # return moveTo(island_pos[island][0] - 1, island_pos[island][1] - 1, pirate)
-                return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] - 1, island_pos[island][1] - 1))
+            try:
+                if colonists[island][0] == id:
+                    return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] + 1, island_pos[island][1] + 1), (pirate.getCurrentFrame() % 16 < 8))
+            except:
+                pass
+            try:
+                if colonists[island][1] == id:
+                    return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] + 1, island_pos[island][1] + 1), (pirate.getCurrentFrame() % 16 >= 8))
+            except:
+                pass
+            try:
+                if colonists[island][2] == id:
+                    return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] - 1, island_pos[island][1] + 1), (pirate.getCurrentFrame() % 16 < 8))
+            except:
+                pass
     pass
+
 
 def update_game_state(team):
     global current_game_state
@@ -502,10 +518,10 @@ def setthem(pirate):
 b = 0
 
 def positionInIsland(pirate):
-    up = pirate.investige_up()
-    down = pirate.investige_down()
-    right = pirate.investige_right()
-    left = pirate.investige_left()
+    up = pirate.investigate_up()
+    down = pirate.investigate_down()
+    right = pirate.investigate_right()
+    left = pirate.investigate_left()
     x, y = pirate.getPosition()
     if up[0:-1] == "island" and down[0:-1] == "island" and right[0:-1] == "island" and left[0:-1] == "island":
         return "centre"   
@@ -538,7 +554,10 @@ def ActPirate(pirate):
        pirates[pirate.getID()] = [pirate.getCurrentFrame(), p[0], p[1]]
     frame = pirate.getCurrentFrame() - pirates[str(id)][0]
     curr_frame = pirate.getCurrentFrame()
-    if id in assassins and frame < 500:
+    if curr_frame > (dimensionX*dimensionY)/3:
+        # print("OVER")
+        pass
+    if id in assassins and pirate.getCurrentFrame() < (dimensionX*dimensionY)/3:
         # print(assassins.index(id))
         # for island in colonists:
             # if id in colonists[island]:
@@ -554,15 +573,16 @@ def ActPirate(pirate):
         else:
             return moveTo(dimensionX-1-p[0], dimensionY-1-p[1], pirate)
 
-    for island in colonists:
-        # print(type(colonists[island][0]))
-        # print(id, colonists[island])
-        if id in colonists[island]:
-            # print(f'Acting colonist {id} on {island}')
-            # print(f'Colonists: {colonists}')
-            # print(island_pos)
-            # print('HERE')
-            return ActColonist(pirate)
+    if pirate.getCurrentFrame() > 100:
+        for island in colonists:
+            # print(type(colonists[island][0]))
+            # print(id, colonists[island])
+            if id in colonists[island]:
+                # print(f'Acting colonist {id} on {island}')
+                # print(f'Colonists: {colonists}')
+                # print(island_pos)
+                # print('HERE')
+                return ActColonist(pirate)
     # if id in :
     #     print(f'Acting colonist')
     #     print(f'Colonists: {colonists}')
@@ -782,41 +802,42 @@ def ActPirate(pirate):
     #         return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,p[1]-width),min(p[1]+width,39)), pirate)
     #     else:
     #         return moveTo(random.randint(max(0,39-p[0]-width),min(39-p[0]+width,39)), random.randint(max(0,39-p[1]-width),min(39-p[1]+width,39)), pirate)
-        if signals.get(id) is None:
-            signals[id] = ""
-        x,y = pirate.getPosition()
-        strp = signals[id]
-        # print(strp)
-        if(strp != ''):
-            try:
-                xchange =int(strp[0])-2
-                ychange = int(strp[1])-2
-            except:
-                xchange=1
-                ychange=1
-        else:
+    # print("HERE")
+    if signals.get(id) is None:
+        signals[id] = ""
+    x,y = pirate.getPosition()
+    strp = signals[id]
+    # print(strp)
+    if(strp != ''):
+        try:
+            xchange =int(strp[0])-2
+            ychange = int(strp[1])-2
+        except:
             xchange=1
             ychange=1
-        if x==pirate.getDimensionX()-1:
-            xchange = -1
-            strp = str(xchange+2)+str(ychange+2)
-            signals[id] = strp
-            # print(strp)
-            # print("rchd end")
-        elif x==0:
-            xchange = 1
-            strp = str(xchange+2)+str(ychange+2)
-            signals[id] = strp
-        if y== 0:
-            ychange = 1
-            strp = str(xchange+2)+str(ychange+2)
-            signals[id] = strp
-        elif y == pirate.getDimensionY()-1:
-            ychange = -1
-            strp = str(xchange+2)+str(ychange+2)
-            signals[id] = strp
-        # print(f"{xchange},{ychange}")
-        return moveTo(x+xchange,y+ychange,pirate)
+    else:
+        xchange=1
+        ychange=1
+    if x==pirate.getDimensionX()-1:
+        xchange = -1
+        strp = str(xchange+2)+str(ychange+2)
+        signals[id] = strp
+        # print(strp)
+        # print("rchd end")
+    elif x==0:
+        xchange = 1
+        strp = str(xchange+2)+str(ychange+2)
+        signals[id] = strp
+    if y== 0:
+        ychange = 1
+        strp = str(xchange+2)+str(ychange+2)
+        signals[id] = strp
+    elif y == pirate.getDimensionY()-1:
+        ychange = -1
+        strp = str(xchange+2)+str(ychange+2)
+        signals[id] = strp
+    # print(f"{xchange},{ychange}")
+    return moveTo(x+xchange,y+ychange,pirate)
 
 
     #Start uncommenting from HERE    
@@ -1086,6 +1107,12 @@ def ActTeam(team):
                 if len(new_pirates) == 0:
                     break
                 colonists[f'island{i}'].append(new_pirates.pop(0))
+    if len(list_of_signals) < 15:
+        for key in colonists:
+            try:
+                colonists[key] = colonists[key][:1]
+            except:
+                pass
 
 
     if len(assassins) < 3 and len(list_of_signals) >= 3:
@@ -1098,34 +1125,34 @@ def ActTeam(team):
         deploy_guards = {pirate: [start_x, start_y, 'blank'] for pirate in closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, team) + closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, team)[1:]}    
         deployed_guards = list(deploy_guards.keys())
         if len(deployed_guards) < 2:
-            closest_to_home = closest_n_pirates(start_x, 1*(start_y==0)+(dimensionY-2)*(start_y==(dimensionY-1)), 1, team)
+            closest_to_home = closest_n_pirates(start_x, 1*(start_y==0)+(dimensionY-2)*(start_y==(dimensionY-1)), min(5, len(list_of_signals)), team)
             index = 0
-        while len(deploy_guards) < 2:
+        while len(deploy_guards) < 2 and index < len(closest_to_home):
             deploy_guards[closest_to_home[index]] = [start_x, start_y, 'blank']
             index += 1
             deployed_guards = list(deploy_guards.keys())
-        if start_x == 0 and start_y == 0:
+        if start_x == 0 and start_y == 0 and 1 < len(deployed_guards):
             deploy_guards[deployed_guards[0]][0] = 1
             deploy_guards[deployed_guards[0]][1] = 0
             deploy_guards[deployed_guards[0]][2] = 'left'
             deploy_guards[deployed_guards[1]][0] = 0
             deploy_guards[deployed_guards[1]][1] = 1
             deploy_guards[deployed_guards[1]][2] = 'down'
-        if start_x == dimensionX-1 and start_y == 0:
+        if start_x == dimensionX-1 and start_y == 0 and 1 < len(deployed_guards):
             deploy_guards[deployed_guards[0]][0] = dimensionX-2
             deploy_guards[deployed_guards[0]][1] = 0
             deploy_guards[deployed_guards[0]][2] = 'right'
             deploy_guards[deployed_guards[1]][0] = dimensionX-1
             deploy_guards[deployed_guards[1]][1] = 1
             deploy_guards[deployed_guards[1]][2] = 'down'
-        if start_x == 0 and start_y == dimensionY-1:
+        if start_x == 0 and start_y == dimensionY-1 and 1 < len(deployed_guards):
             deploy_guards[deployed_guards[0]][0] = 1
             deploy_guards[deployed_guards[0]][1] = dimensionY-1
             deploy_guards[deployed_guards[0]][2] = 'left'
             deploy_guards[deployed_guards[1]][0] = 0
             deploy_guards[deployed_guards[1]][1] = dimensionY-2
             deploy_guards[deployed_guards[1]][2] = 'up'
-        if start_x == dimensionX-1 and start_y == dimensionY-1:
+        if start_x == dimensionX-1 and start_y == dimensionY-1 and 1 < len(deployed_guards):
             deploy_guards[deployed_guards[0]][0] = dimensionX-2
             deploy_guards[deployed_guards[0]][1] = dimensionY-1
             deploy_guards[deployed_guards[0]][2] = 'right'
