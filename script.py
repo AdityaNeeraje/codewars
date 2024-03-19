@@ -536,13 +536,14 @@ def ActPirate(pirate):
     curr_frame = pirate.getCurrentFrame()
     if id in assassins:
         if id == assassins[0]: #Instead, let actteam return the string a1 for the first assassin
-            return moveTo(dimensionX-p[0], dimensionY-1-p[1], pirate)
+            # print(dimensionX-p[0], dimensionY-1-p[1], pirate.getPosition())
+            return moveTo(dimensionX-1-p[0], dimensionY-2-p[1], pirate)
         elif id == assassins[1]: #Instead, let actteam return the string a2 for the second assassin
-            return moveTo(dimensionX-1-p[0], dimensionY-p[1], pirate)
+            return moveTo(dimensionX-2-p[0], dimensionY-1-p[1], pirate)
         elif gunpowder > 100 or id%2 == 1:
-            return moveTo(dimensionY-p[0], dimensionX-p[1], pirate)
+            return moveTo(dimensionY-1-p[0], dimensionX-1-p[1], pirate)
         else:
-            return moveTo(dimensionX-1-p[0], dimensionY-1-p[1], pirate)
+            return moveTo(dimensionX-2-p[0], dimensionY-2-p[1], pirate)
 
     for island in colonists:
         if id in colonists[island]:
@@ -665,7 +666,7 @@ def ActPirate(pirate):
             
 
     if frame > 600:
-        print("HERE")
+        # print("HERE")
         p = pirate.getDeployPoint()
     # if (frame < 75):
     #     return moveTo(39-p[0], 39-p[1], pirate)
@@ -738,7 +739,7 @@ def ActPirate(pirate):
     elif frame % 80 > 40 and 500 <= frame < 2000:
         return moveTo(p[0], 39-p[1], pirate)
     else:
-        print("HERE3")
+        # print("HERE3")
         up = pirate.investigate_up()
         down = pirate.investigate_down()
         left = pirate.investigate_left()
