@@ -1,21 +1,21 @@
 import random
 import math
-import signal
-
-from pygame import init
 
 from engine import island, pirate
 
-name = "script"
+name = "new_script"
 
-# Into the team signal
 island_pos = {
     'island1': (0, 0),
     'island2': (0, 0),
     'island3': (0, 0)
 }
 
-# pirates_on_islands = 0
+pirates_on_islands = 0
+
+gunpowder = 0
+rum = 0
+wood = 0
 
 deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
@@ -36,18 +36,6 @@ gunPowder = 0
 rum = 0
 wood = 0
 
-# pirate_pos = dict()
-pirate_goal = dict()
-island_pos = dict()
-
-def sig_decode(signal:str):
-    dec_data = dict()
-    # Encode string to bytes
-    byte_data = signal.encode('utf-8')
-    # Convert bytes to binary string
-    binary_str = ''.join(format(byte, '08b') for byte in byte_data)
-    return binary_str
-    pass
 
 def ActAsGuard(x, y, pirate, dir_island):
     up = pirate.investigate_up()[1]
@@ -120,6 +108,32 @@ def ActAsGuard(x, y, pirate, dir_island):
         elif (sw == 'enemy'):
             return moveTo(x, y+1, pirate)
     return moveTo(x, y, pirate)
+
+# def ActColonist(x,y,pirate):
+#     up = pirate.investigate_up()[1]
+#     down = pirate.investigate_down()[1]
+#     left = pirate.investigate_left()[1]
+#     right = pirate.investigate_right()[1]
+#     ne = pirate.investigate_ne()[1]
+#     nw = pirate.investigate_nw()[1]
+#     se = pirate.investigate_se()[1]
+#     sw = pirate.investigate_sw()[1]
+#     if (up == 'enemy'):
+#         return moveTo(x, y-1, pirate)
+#     elif (ne == 'enemy' or nw == 'enemy'):
+#         return moveTo(x, y-1, pirate)
+#     if (left == 'enemy'):
+#         return moveTo(x-1, y, pirate)
+#     elif (right == 'enemy'):
+#         return moveTo(x+1, y, pirate)
+#     elif (down == 'enemy'):
+#         return moveTo(x, y+1, pirate)
+#     elif (sw == 'enemy'):
+#         return moveTo(x-1, y, pirate)
+#     elif (se == 'enemy'):
+#         return moveTo(x+1, y, pirate)
+#     return moveTo(x, y, pirate)
+
 
 # Move a pirate to a given position
 def moveTo(x, y, Pirate):
@@ -266,39 +280,71 @@ def checkIsland(pirate):
     else:
         return False
 
+# game_pos = 0
+# 0: Game just started
+# 1: One Island found
+# 2: Second Island found
+# 3: Island being captured
+
+# Make an enum for the game state
+class GameState:
+    START = 0
+    ONE_ISLAND = 1
+    TWO_ISLANDS = 2
+    CAPTURING = 3
+
+current_game_state = GameState.START
+
 def ActColonist(pirate):
     global pirate_pos, island_pos, colonists
     id = int(pirate.getID())
     for island in colonists:
         if id in colonists[island]:
+            # print(f'Colonists: {colonists}')
+            # print(f'Island: {island}')
             if colonists[island][0] == id:
+                # if id not in pirate_pos:
+                #     print(f'Pirate dead: {id}')
+                # print(f'Colonist {id} on {island} and moving to {island_pos[island]}')
                 return moveTo(island_pos[island][0], island_pos[island][1], pirate)
             elif colonists[island][1] == id:
+                # if id not in pirate_pos:
+                #     print(f'Pirate dead: {id}')
+                # print(f'Colonist {id} on {island} and moving to {(island_pos[island][0] + 1, island_pos[island][1] + 1)}')
+                # return moveTo(island_pos[island][0] + 1, island_pos[island][1] + 1, pirate)
                 return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] + 1, island_pos[island][1] + 1))
             else:
+                # if id not in pirate_pos:
+                #     print(f'Pirate dead: {id}')
+                # print(f'Colonist {id} on {island} and moving to {(island_pos[island][0] - 1, island_pos[island][1] - 1)}')
+                # return moveTo(island_pos[island][0] - 1, island_pos[island][1] - 1, pirate)
                 return circleAround(island_pos[island][0], island_pos[island][1], 1, pirate, (island_pos[island][0] - 1, island_pos[island][1] - 1))
     pass
 
-# def update_game_state(team):
-#     global current_game_state
-#     captured_count = sum(1 for status in team.trackPlayers() if status == "myCaptured")
-#     capturing_count = sum(1 for status in team.trackPlayers() if status == "myCapturing")
+def update_game_state(team):
+    global current_game_state
+    captured_count = sum(1 for status in team.trackPlayers() if status == "myCaptured")
+    capturing_count = sum(1 for status in team.trackPlayers() if status == "myCapturing")
     
-#     if captured_count == 1:
-#         current_game_state = GameState.ONE_ISLAND
-#     elif captured_count == 2:
-#         current_game_state = GameState.TWO_ISLANDS
-#     elif capturing_count > 0:
-#         current_game_state = GameState.CAPTURING
-#     else:
-#         current_game_state = GameState.START
+    if captured_count == 1:
+        current_game_state = GameState.ONE_ISLAND
+    elif captured_count == 2:
+        current_game_state = GameState.TWO_ISLANDS
+    elif capturing_count > 0:
+        current_game_state = GameState.CAPTURING
+    else:
+        current_game_state = GameState.START
 
 def check_game_state():
     global current_game_state
     return current_game_state
 
+pirate_pos = dict()
+pirate_goal = dict()
+island_pos = dict()
+
 # Get the closest n pirates to a given position
-def closest_n_pirates(x, y, n, pirate_pos):
+def closest_n_pirates(x, y, n, team):
     # pirates = pirate_pos.keys()
     # pirates.sort(key=lambda p: abs(p.getPosition()[0] - x) + abs(p.getPosition()[1] - y))
     pirates = {k: v for k, v in sorted(pirate_pos.items(), key=lambda item: abs(item[1][0] - x) + abs(item[1][1] - y))}
@@ -477,20 +523,16 @@ def positionInIsland(pirate):
         return "bottommiddle"
 
 def ActPirate(pirate):
-    global assassins, gunPowder, rum, wood, possible_positions, destinations_for_actors, destination_visits
-    p = list(pirate.getDeployPoint())
-    id = int(pirate.getID())
-    print(f'Pirate Signal: {pirate.getSignal()}')
-    if pirate.getSignal().count(',') == 0:
-        pirate.setSignal(f"{id},{pirate.getPosition()[0]},{pirate.getPosition()[1]},{pirate.getCurrentFrame()}")
-        init_frame = pirate.getCurrentFrame()
-    else:
-        _, __x, __y, init_frame = pirate.getSignal().strip().split(',')
+    global pirate_pos, assassins, gunpowder, rum, wood, possible_positions, destinations_for_actors, destination_visits, pirates
     dimensionX = pirate.getDimensionX()
     dimensionY = pirate.getDimensionY()
-    if pirate.getID() not in pirates:   
+    p = list(pirate.getDeployPoint())
+    id = int(pirate.getID())
+    pirate.setSignal(f"{id}")
+    pirate_pos[id] = pirate.getPosition()
+    if pirate.getID() not in pirates:
        pirates[pirate.getID()] = [pirate.getCurrentFrame(), p[0], p[1]]
-    frame = pirate.getCurrentFrame() - int(init_frame)
+    frame = pirate.getCurrentFrame() - pirates[str(id)][0]
     curr_frame = pirate.getCurrentFrame()
     if id in assassins:
         if id == assassins[0]: #Instead, let actteam return the string a1 for the first assassin
@@ -498,14 +540,22 @@ def ActPirate(pirate):
             return moveTo(dimensionX-1-abs(p[0]-1), dimensionY-1-p[1], pirate)
         elif id == assassins[1]: #Instead, let actteam return the string a2 for the second assassin
             return moveTo(dimensionX-1-p[0], dimensionY-1-abs(p[1]-1), pirate)
-        elif gunPowder > 100 or id%2 == 1:
+        elif gunpowder > 100 or id%2 == 1:
             return moveTo(dimensionY-1-abs(p[0]-1), dimensionX-1-abs(p[1]-1), pirate)
         else:
             return moveTo(dimensionX-1-p[0], dimensionY-1-p[1], pirate)
 
     for island in colonists:
         if id in colonists[island]:
+            # print(f'Acting colonist {id} on {island}')
+            # print(f'Colonists: {colonists}')
+            # print(island_pos)
             return ActColonist(pirate)
+    # if id in :
+    #     print(f'Acting colonist')
+    #     print(f'Colonists: {colonists}')
+    #     # print(f'Ghosts: {}')
+    #     return ActColonist(pirate)
     
     if id in deploy_guards:
         return ActGuard(deploy_guards[id][0], deploy_guards[id][1], pirate, deploy_guards[id][2])
@@ -517,102 +567,157 @@ def ActPirate(pirate):
         # print(index, possible_positions[index])
         # If position is x, y and start is start_x, start_y, then possible_positions x-start_x + y - start_y is needed
         if pirate.getDeployPoint()[0] != pirate.getDeployPoint()[1]:
-            if id%3 == 0:
+            if id%2 == 0:
                 some_dict = dict(sorted({key: value for key, value in \
                                                          possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], random.random())))
-            elif id%3 == 1:
-                some_dict = dict(sorted({key: value for key, value in \
-                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
-            elif id%3 == 2:
-                some_dict = dict(sorted({key: value for key, value in \
-                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
+            else:
+                if random.randint(0,8) != 0:
+                    if id%4 == 1:
+                        some_dict = dict(sorted({key: value for key, value in \
+                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+                    else:
+                        some_dict = dict(sorted({key: value for key, value in \
+                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
+                else:
+                    if id%4 == 1:
+                        some_dict = dict(sorted({key: value for key, value in \
+                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
+                    else:
+                        some_dict = dict(sorted({key: value for key, value in \
+                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+            # elif id%4 == 3:
+            #     some_dict = dict(sorted({key: value for key, value in \
+            #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
         else:
-            if id%3 == 0:
+            if id%2 == 0:
                 some_dict = dict(sorted({key: value for key, value in \
                                                          possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], random.random())))
-            elif id %3 == 1:
-                some_dict = dict(sorted({key: value for key, value in \
-                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
-            elif id%3 == 2:
-                some_dict = dict(sorted({key: value for key, value in \
-                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1]))
-            )
+            else:
+                if random.randint(0,8) != 0:
+                    if id%4 == 1:
+                        some_dict = dict(sorted({key: value for key, value in \
+                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+                    else:
+                        some_dict = dict(sorted({key: value for key, value in \
+                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1])))
+                else:
+                    if id%4 == 1:
+                        some_dict = dict(sorted({key: value for key, value in \
+                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1])))
+                    else:
+                        some_dict = dict(sorted({key: value for key, value in \
+                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+            # elif id%4 == 1:
+            #     some_dict = dict(sorted({key: value for key, value in \
+            #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+            # elif id%4 == 3:
+            #     some_dict = dict(sorted({key: value for key, value in \
+            #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1]))
+            # )
+
+        # if pirate.getDeployPoint()[0] != pirate.getDeployPoint()[1]:
+        #     if frame%(id%6 + 2) == 0:
+        #         some_dict = dict(sorted({key: value for key, value in \
+        #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (x[0][0]+1))))
+        #     else:
+        #         some_dict = dict(sorted({key: value for key, value in \
+        #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (dimensionX-x[0][1]))))
+        #     # elif id%3 == 1:
+        #     #     some_dict = dict(sorted({key: value for key, value in \
+        #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+        #     # elif id%3 == 2:
+        #     #     some_dict = dict(sorted({key: value for key, value in \
+        #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
+        # else:
+        #     if frame%(id%6 + 2) == 0:
+        #         some_dict = dict(sorted({key: value for key, value in \
+        #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (x[0][0]+1))))
+        #     else:
+        #         some_dict = dict(sorted({key: value for key, value in \
+        #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (x[0][1]+1))))
+        #     # elif id %3 == 1:
+        #     #     some_dict = dict(sorted({key: value for key, value in \
+        #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+        #     # elif id%3 == 2:
+        #     #     some_dict = dict(sorted({key: value for key, value in \
+        #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1]))
+        #     # )
         choice = list(some_dict.keys())[0]
         possible_positions[index][choice] += 1
         return moveTo(choice[0], choice[1], pirate)
         
     if id%10 == 1:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 8
+            p[1] = dimensionY//5
         elif p[0] == 0 and p[1] == 39:
-            p[0] = 8
-        elif p[0] == 39 and p[1] == 39:
-            p[1] = 31
-        elif p[0] == 39 and p[1] == 0:
-            p[0] = 31
+            p[0] = dimensionX//5
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - dimensionY//5
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[0] = dimensionX - 1 - dimensionX//5
     if id%10 == 2:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 16
-        elif p[0] == 0 and p[1] == 39:
-            p[0] = 16
-        elif p[0] == 39 and p[1] == 39:
-            p[1] = 23
-        elif p[0] == 39 and p[1] == 0:
-            p[0] = 23
+            p[1] = 2*dimensionY//5
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[0] = 2*dimensionX//5
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - 2*dimensionY//5
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[0] = dimensionX - 1 - 2*dimensionX//5
     if id%10 == 3:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 24
-        elif p[0] == 0 and p[1] == 39:
-            p[0] = 24
-        elif p[0] == 39 and p[1] == 39:
-            p[1] = 15
-        elif p[0] == 39 and p[1] == 0:
-            p[0] = 15
+            p[1] = 3*dimensionY//5
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[0] = 3*dimensionX//5
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - 3*dimensionY//5
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[0] = dimensionX - 1 - 3*dimensionX//5
     if id%10 == 4:
         if p[0] == 0 and p[1] == 0:
-            p[1] = 32
-        elif p[0] == 0 and p[1] == 39:
-            p[0] = 32
-        elif p[0] == 39 and p[1] == 39:
-            p[1] = 7
-        elif p[0] == 39 and p[1] == 0:
-            p[0] = 7
+            p[1] = 4*dimensionY//5
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[0] = 4*dimensionX//5
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - 4*dimensionY//5
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[0] = dimensionX - 1 - 4*dimensionX//5
     if id%10 == 5:
             if p[0] == 0 and p[1] == 0:
-                p[0] = 8
-            elif p[0] == 0 and p[1] == 39:
-                p[1] = 31
-            elif p[0] == 39 and p[1] == 39:
-                p[0] = 31
-            elif p[0] == 39 and p[1] == 0:
-                p[1] = 8
+                p[0] = dimensionX//5
+            elif p[0] == 0 and p[1] == dimensionY - 1:
+                p[1] = dimensionY - 1 - dimensionY//5
+            elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+                p[0] = dimensionX - 1 - dimensionX//5
+            elif p[0] == dimensionX - 1 and p[1] == 0:
+                p[1] = dimensionY//5
     if id%10 == 6:
         if p[0] == 0 and p[1] == 0:
-            p[0] = 16
-        elif p[0] == 0 and p[1] == 39:
-            p[1] = 23
-        elif p[0] == 39 and p[1] == 39:
-            p[0] = 23
-        elif p[0] == 39 and p[1] == 0:
-            p[1] = 16
+            p[0] = 2*dimensionX//5
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - 2*dimensionY//5
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[0] = dimensionX - 1 - 2*dimensionX//5
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[1] = 2*dimensionY//5
     if id%10 == 7:
         if p[0] == 0 and p[1] == 0:
-            p[0] = 24
-        elif p[0] == 0 and p[1] == 39:
-            p[1] = 15
-        elif p[0] == 39 and p[1] == 39:
-            p[0] = 15
-        elif p[0] == 39 and p[1] == 0:
-            p[1] = 24   
+            p[0] = 3*dimensionX//5
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - 3*dimensionY//5
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[0] = dimensionX - 1 - 3*dimensionX//5
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[1] = 3*dimensionY//5
     if id%10 == 8:
         if p[0] == 0 and p[1] == 0:
-            p[0] = 32
-        elif p[0] == 0 and p[1] == 39:
-            p[1] = 7
-        elif p[0] == 39 and p[1] == 39:
-            p[0] = 7
-        elif p[0] == 39 and p[1] == 0:
-            p[1] = 32    
+            p[0] = 4*dimensionX//5
+        elif p[0] == 0 and p[1] == dimensionY - 1:
+            p[1] = dimensionY - 1 - 4*dimensionY//5
+        elif p[0] == dimensionX - 1 and p[1] == dimensionY - 1:
+            p[0] = dimensionX - 1 - 4*dimensionX//5
+        elif p[0] == dimensionX - 1 and p[1] == 0:
+            p[1] = 4*dimensionY//5
             
 
     if frame > 600:
@@ -844,6 +949,9 @@ def ActTeam(team):
         #     # positions_i_want = [(x, y) for x in range(40) for y in range(40) if abs(start_x - x) + abs(start_y - y) == i]
         #     possible_positions[i-1] = possible_positions[i-2].copy()
         possible_positions[team.getCurrentFrame()-1] = {(x, y): 0 for x in range(dimensionX) for y in range(dimensionY) if abs(start_x - x) + abs(start_y - y) == team.getCurrentFrame()}
+        curr_positions = list(pirate_pos.values())
+        for i in range(team.getCurrentFrame()-1):
+            possible_positions[i-1] = {(x,y): curr_positions.count((x,y)) for x in range(dimensionX) for y in range(dimensionY) if abs(start_x-x) + abs(start_y-y) == i}
         # positions_i_want = [(x, y) for x in range(39,-1,-1) for y in range(39,-1,-1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
         # if start_x == 39 and start_y == 39:
         #     positions_i_want = [(x, y) for x in range(39,-1,-1) for y in range(39,-1,-1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
@@ -874,30 +982,16 @@ def ActTeam(team):
     if 'island3' not in island_pos:
         island_pos['island3'] = (0, 0)
 
-    pirate_pos = dict()
-
-    pirate_signals = team.getListOfSignals()
-    for signal in pirate_signals:
-        if signal.count(',') != 2:
-            continue
-        print(signal)
-        pirate_id, x, y = signal.split(',')
-        pirate_pos[int(pirate_id)] = (int(x), int(y))
-
-    # pirates_on_islands = 0
-    # for island in island_pos:
-    #     if island_pos[island] != (0, 0):
-    #         for pirate in pirate_pos:
-    #             print(pirate_pos[pirate])
-    #             # if pirate_pos[pirate][0] <= island_pos[0] + 1 and pirate_pos[0] >= island_pos[0] - 1 and pirate_pos[1] <= island_pos[1] + 1 and pirate_pos[1] >= island_pos[1] - 1:
-    #             if pirate_pos[pirate][0] <= island_pos[island][0] + 1 and pirate_pos[pirate][0] >= island_pos[island][0] - 1 and pirate_pos[pirate][1] <= island_pos[island][1] + 1 and pirate_pos[pirate][1] >= island_pos[island][1] - 1:
-    #                 pirates_on_islands += 1
-    # print(f'Pirates on islands: {pirates_on_islands}')
-    # print(island_pos)
-    # print(colonists)
+    pirates_on_islands = 0
+    for island in island_pos:
+        if island_pos[island] != (0, 0):
+            for pirate in pirate_pos:
+                # if pirate_pos[pirate][0] <= island_pos[0] + 1 and pirate_pos[0] >= island_pos[0] - 1 and pirate_pos[1] <= island_pos[1] + 1 and pirate_pos[1] >= island_pos[1] - 1:
+                if pirate_pos[pirate][0] <= island_pos[island][0] + 1 and pirate_pos[pirate][0] >= island_pos[island][0] - 1 and pirate_pos[pirate][1] <= island_pos[island][1] + 1 and pirate_pos[pirate][1] >= island_pos[island][1] - 1:
+                    pirates_on_islands += 1
 
     start_x, start_y = team.getDeployPoint()
-    list_of_signals = [x.split(',')[0] for x in team.getListOfSignals()]
+    list_of_signals = team.getListOfSignals()
     new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
     dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals] 
     for id in dead_pirates:
@@ -912,22 +1006,22 @@ def ActTeam(team):
                 colonists[key].remove(id)
     for i in range(1, 4):
         if island_pos[f'island{i}'] != (0, 0):
-            colonists[f'island{i}'] = closest_n_pirates(island_pos[f'island{i}'][0], island_pos[f'island{i}'][1], 3, pirate_pos)
+            colonists[f'island{i}'] = closest_n_pirates(island_pos[f'island{i}'][0], island_pos[f'island{i}'][1], 3, team)
             if len(colonists[f'island{i}']) < 3:
                 if len(new_pirates) == 0:
                     break
                 colonists[f'island{i}'].append(new_pirates.pop(0))
 
 
-    if len(assassins) < 6 and len(list_of_signals) >= 5:
-        assassins = closest_n_pirates(dimensionX-1-start_x, dimensionY-1-start_y, 5, pirate_pos)
+    if len(assassins) < 3 and len(list_of_signals) >= 3:
+        assassins = closest_n_pirates(dimensionX-1-start_x, dimensionY-1-start_y, 3, team)
     if team.getCurrentFrame() > dimensionX and len(deploy_guards) < 2 and len(list_of_signals) >= 2:
         # print(closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, team))
         # print(closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, team)[1:])
-        deploy_guards = {pirate: [start_x, start_y, 'blank'] for pirate in closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, pirate_pos) + closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, pirate_pos)[1:]}    
+        deploy_guards = {pirate: [start_x, start_y, 'blank'] for pirate in closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, team) + closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, team)[1:]}    
         deployed_guards = list(deploy_guards.keys())
         if len(deployed_guards) < 2:
-            closest_to_home = closest_n_pirates(start_x, 1*(start_y==0)+(dimensionY-2)*(start_y==(dimensionY-1)), 1, pirate_pos)
+            closest_to_home = closest_n_pirates(start_x, 1*(start_y==0)+(dimensionY-2)*(start_y==(dimensionY-1)), 1, team)
             index = 0
         while len(deploy_guards) < 2:
             deploy_guards[closest_to_home[index]] = [start_x, start_y, 'blank']
@@ -962,5 +1056,5 @@ def ActTeam(team):
             deploy_guards[deployed_guards[1]][1] = dimensionY-2
             deploy_guards[deployed_guards[1]][2] = 'up'
     earlier_list_of_signals = list_of_signals.copy()
-    # gunPowder = team.getTotalGunpowder()
+    # gunpowder = team.getTotalGunpowder()
     pass
