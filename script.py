@@ -1,5 +1,6 @@
 import random
 import math
+import copy
 
 from engine import island, pirate
 
@@ -82,13 +83,15 @@ def decode_signal(signal):
     signal_data['colonists']['island3'] = [int(ord(signal[5]) // (2**9)), int(ord(signal[5]) % (2**9) // (2**0)), int(ord(signal[6]) // (2**9))]
 
     #Assassins...
+    
     signal_data['assassins'] = [int(ord(signal[6]) % (2**9) // (2**0)), int(ord(signal[7]) // (2**9)), int(ord(signal[7]) % (2**9) // (2**0))]
+
+    # print('decode', signal_data['assassins'])
 
     return signal_data
 
 def encode_signal(signal_data):
     signal = ""
-    assassins = signal_data['assassins']
 
     signal += chr((2**12)*signal_data['island_pos']['island1'][0] + (2**6)*signal_data['island_pos']['island1'][1] + (2**0)*signal_data['island_pos']['island2'][0])
     signal += chr((2**12)*signal_data['island_pos']['island2'][1] + (2**6)*signal_data['island_pos']['island3'][0] + (2**0)*signal_data['island_pos']['island3'][1])
@@ -97,10 +100,12 @@ def encode_signal(signal_data):
     signal += chr((2**9)*int(signal_data['colonists']['island1'][2]) + (2**0)*int(signal_data['colonists']['island2'][0]))
     signal += chr((2**9)*int(signal_data['colonists']['island2'][1]) + (2**0)*int(signal_data['colonists']['island2'][2]))
     signal += chr((2**9)*int(signal_data['colonists']['island3'][0]) + (2**0)*int(signal_data['colonists']['island3'][1]))
-    signal += chr((2**9)*int(signal_data['colonists']['island3'][2])) \
-    
-    + (2**0)*int(assassins[0])
-    signal += chr((2**9)*int(assassins[1]) + (2**0)*int(assassins[2]))
+    signal += chr((2**9)*int(signal_data['colonists']['island3'][2]))
+
+    signal += chr((2**9)*int(signal_data['assassins'][0]) + (2**0)*int(signal_data['assassins'][1]))
+    signal += chr((2**9)*int(signal_data['assassins'][2]))
+
+    # print('encode', int(signal_data['assassins'][0]), int(signal_data['assassins'][1]), int(signal_data['assassins'][2]))
                   
     return signal
 
@@ -325,9 +330,9 @@ def ActColonist(pirate, island_pos, colonists):
 # Get the closest n pirates to a given position
 def closest_n_pirates(x, y, n, pirate_pos):
     pirates = {k: v for k, v in sorted(pirate_pos.items(), key=lambda item: abs(item[1][0] - x) + abs(item[1][1] - y))}
-    # print('FUNC', pirate_pos)
-    # print('Func1', pirates)
-    return list(pirates.keys())[:n]
+    closest_pirates = list(pirates.keys())[:n] # Get the first n pirates from the sorted list
+    # print(list(pirates.keys()), closest_pirates)
+    return closest_pirates
 
 def checkfriends(pirate, quad):
     sum = 0 
@@ -517,7 +522,8 @@ def ActPirate(pirate):
     p = list(pirate.getDeployPoint())
     x, y = pirate.getPosition()
     id = int(pirate.getID())
-    print(id, x, y)
+    # print(id, x, y, assassins)
+    # print('Ass', assassins)
     if pirate.getSignal().count(',') == 0:
         pirate.setSignal(f"{id},{pirate.getPosition()[0]},{pirate.getPosition()[1]},{pirate.getCurrentFrame()}")
         init_frame = pirate.getCurrentFrame()
@@ -935,7 +941,8 @@ def ActTeam(team):
             deploy_guards[deployed_guards[1]][2] = 'up'
     earlier_list_of_signals = list_of_signals
     signal_data['assassins'] = assassins
-    # print("END", assassins)
+    # print('ASS', assassins)
     signal = encode_signal(signal_data)
+    # print('END ASS', assassins, signal_data['assassins'])
     # print(signal_data)
     team.setTeamSignal(signal)
