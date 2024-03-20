@@ -29,7 +29,7 @@ class Game:
         self.__sea = Group()
         self.__dim = dim
         self.__frame = 0
-        self.rate = 10
+        self.rate = 100
         self.explosion = pygame.image.load("images/explode.png")
         self.purple_pirate = pygame.image.load("images/piratepurple.png")
         self.screen = pygame.display.set_mode(

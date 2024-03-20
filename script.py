@@ -6,17 +6,11 @@ from engine import island, pirate
 
 name = "script"
 
-island_pos = {
-    'island1': (0, 0),
-    'island2': (0, 0),
-    'island3': (0, 0)
-}
-
-pirates_on_islands = 0
-
-gunpowder = 0
-rum = 0
-wood = 0
+# island_pos = {
+#     'island1': (0, 0),
+#     'island2': (0, 0),
+#     'island3': (0, 0)
+# }
 
 signals = {}
 deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
@@ -25,11 +19,6 @@ deploy_guards = {} # This has the id of every living guard as a key and their po
 earlier_list_of_signals = []
 possible_positions = {id: {} for id in range(78)} # subtract frame from the current frame to get the id number (maybe +1)
 reached_end = False
-
-# Our resources
-gunPowder = 0
-rum = 0
-wood = 0
 
 def encode_direction(direction):
     match(direction):
@@ -85,8 +74,6 @@ def decode_signal(signal):
     #Assassins...
     signal_data['assassins'] = [int(ord(signal[7]) // (2**9)), int(ord(signal[7]) % (2**9) // (2**0)), int(ord(signal[8]) // (2**9))]
 
-    # print('decode ass', signal_data['assassins'])
-
     return signal_data
 
 def encode_signal(signal_data):
@@ -103,8 +90,6 @@ def encode_signal(signal_data):
 
     signal += chr((2**9)*int(signal_data['assassins'][0]) + (2**0)*int(signal_data['assassins'][1]))
     signal += chr((2**9)*int(signal_data['assassins'][2]))
-
-    # print('encode ass', int(signal_data['assassins'][0]), int(signal_data['assassins'][1]), int(signal_data['assassins'][2]))
                   
     return signal
 
@@ -518,6 +503,9 @@ def ActPirate(pirate):
 
     dimensionX = pirate.getDimensionX()
     dimensionY = pirate.getDimensionY()
+    gunpowder = pirate.getTotalGunpowder()
+    rum = pirate.getTotalRum()
+    wood = pirate.getTotalWood()
     p = list(pirate.getDeployPoint())
     x, y = pirate.getPosition()
     id = int(pirate.getID())
@@ -757,7 +745,7 @@ def ActPirate(pirate):
             
     if signals.get(id) is None:
         signals[id] = ""
-    x,y = pirate.getPosition()
+    # x,y = pirate.getPosition()
     strp = signals[id]
     if(strp != ''):
         try:
@@ -769,17 +757,17 @@ def ActPirate(pirate):
     else:
         xchange=1
         ychange=1
-    if x==pirate.getDimensionX()-1:
+    if x == pirate.getDimensionX()-1:
         xchange = -1
         strp = str(xchange+2)+str(ychange+2)
         signals[id] = strp
         # print(strp)
         # print("rchd end")
-    elif x==0:
+    elif x == 0:
         xchange = 1
         strp = str(xchange+2)+str(ychange+2)
         signals[id] = strp
-    if y== 0:
+    if y == 0:
         ychange = 1
         strp = str(xchange+2)+str(ychange+2)
         signals[id] = strp
@@ -907,7 +895,7 @@ def ActTeam(team):
             index += 1
             deployed_guards = list(deploy_guards.keys())
         if start_x == 0 and start_y == 0 and 1 < len(deployed_guards):
-            print("Guards", deployed_guards[0], deployed_guards[1])
+            # print("Guards", deployed_guards[0], deployed_guards[1])
             deploy_guards[deployed_guards[0]][0] = 1
             deploy_guards[deployed_guards[0]][1] = 0
             deploy_guards[deployed_guards[0]][2] = 'left'
@@ -915,7 +903,7 @@ def ActTeam(team):
             deploy_guards[deployed_guards[1]][1] = 1
             deploy_guards[deployed_guards[1]][2] = 'down'
         if start_x == dimensionX-1 and start_y == 0 and 1 < len(deployed_guards):
-            print("Guards", deployed_guards[0], deployed_guards[1])
+            # print("Guards", deployed_guards[0], deployed_guards[1])
             deploy_guards[deployed_guards[0]][0] = dimensionX-2
             deploy_guards[deployed_guards[0]][1] = 0
             deploy_guards[deployed_guards[0]][2] = 'right'
@@ -923,7 +911,7 @@ def ActTeam(team):
             deploy_guards[deployed_guards[1]][1] = 1
             deploy_guards[deployed_guards[1]][2] = 'down'
         if start_x == 0 and start_y == dimensionY-1 and 1 < len(deployed_guards):
-            print("Guards", deployed_guards[0], deployed_guards[1])
+            # print("Guards", deployed_guards[0], deployed_guards[1])
             deploy_guards[deployed_guards[0]][0] = 1
             deploy_guards[deployed_guards[0]][1] = dimensionY-1
             deploy_guards[deployed_guards[0]][2] = 'left'
@@ -931,7 +919,7 @@ def ActTeam(team):
             deploy_guards[deployed_guards[1]][1] = dimensionY-2
             deploy_guards[deployed_guards[1]][2] = 'up'
         if start_x == dimensionX-1 and start_y == dimensionY-1 and 1 < len(deployed_guards):
-            print("Guards", deployed_guards[0], deployed_guards[1])
+            # print("Guards", deployed_guards[0], deployed_guards[1])
             deploy_guards[deployed_guards[0]][0] = dimensionX-2
             deploy_guards[deployed_guards[0]][1] = dimensionY-1
             deploy_guards[deployed_guards[0]][2] = 'right'
@@ -940,8 +928,5 @@ def ActTeam(team):
             deploy_guards[deployed_guards[1]][2] = 'up'
     earlier_list_of_signals = list_of_signals
     signal_data['assassins'] = assassins
-    # print('ASS', assassins)
     signal = encode_signal(signal_data)
-    print('END ASS', assassins, signal_data['assassins'], decode_signal(encode_signal(signal_data))['assassins'])
-    # print(signal_data)
     team.setTeamSignal(signal)
