@@ -829,7 +829,7 @@ def ActPirate(pirate):
 
 def ActTeam(team):
     global earlier_list_of_signals, gunPowder, wood, rum, possible_positions, reached_end
-    print(team.getTeamSignal())
+    # print(team.getTeamSignal())
     if team.getCurrentFrame() == 1:
         signal_data = {
             'island_pos': {
@@ -864,6 +864,8 @@ def ActTeam(team):
         pirate_id, x, y, init_frame = signal.split(',')
         pirate_positions[int(pirate_id)] = (int(x), int(y), int(init_frame))
 
+    print('FRAME', team.getCurrentFrame(), pirate_positions)
+
     if not reached_end:
         start_x, start_y = team.getDeployPoint()
         possible_positions[team.getCurrentFrame()-1] = {(x, y): 0 for x in range(dimensionX) for y in range(dimensionY) if abs(start_x - x) + abs(start_y - y) == team.getCurrentFrame()}
@@ -890,7 +892,7 @@ def ActTeam(team):
             continue
         pirate_id, x, y, init_frame = signal.split(',')
         pirate_pos[int(pirate_id)] = (int(x), int(y), int(init_frame))
-    # print(pirate_pos)
+    print('FRAME2', pirate_pos)
 
     start_x, start_y = team.getDeployPoint()
     colonists = signal_data['colonists']

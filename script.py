@@ -325,6 +325,8 @@ def ActColonist(pirate, island_pos, colonists):
 # Get the closest n pirates to a given position
 def closest_n_pirates(x, y, n, pirate_pos):
     pirates = {k: v for k, v in sorted(pirate_pos.items(), key=lambda item: abs(item[1][0] - x) + abs(item[1][1] - y))}
+    # print('FUNC', pirate_pos)
+    # print('Func1', pirates)
     return list(pirates.keys())[:n]
 
 def checkfriends(pirate, quad):
@@ -513,7 +515,9 @@ def ActPirate(pirate):
     dimensionX = pirate.getDimensionX()
     dimensionY = pirate.getDimensionY()
     p = list(pirate.getDeployPoint())
+    x, y = pirate.getPosition()
     id = int(pirate.getID())
+    print(id, x, y)
     if pirate.getSignal().count(',') == 0:
         pirate.setSignal(f"{id},{pirate.getPosition()[0]},{pirate.getPosition()[1]},{pirate.getCurrentFrame()}")
         init_frame = pirate.getCurrentFrame()
@@ -527,35 +531,28 @@ def ActPirate(pirate):
         pass
     # print(pirate.getCurrentFrame()
     #  and pirate.getCurrentFrame() < (dimensionX*dimensionY)/3
-    if id in assassins:
-        if id == assassins[0]: #Instead, let actteam return the string a1 for the first assassin
+    # print(assassins)
+    if id in assassins and pirate.getCurrentFrame() > 1:
+        # print(id, assassins)
+        # print('nirav', id, assassins)
+        if id == assassins[1]: #Instead, let actteam return the string a1 for the first assassin
             # print(dimensionX-1-p[0], dimensionY-2-p[1], pirate.getPosition())
-            # print(dimensionX-1-abs(p[0]-1), dimensionY-1-p[1])
+            # print('haha0', x, y, dimensionX-1-abs(p[0]-1), dimensionY-1-p[1])
             return moveTo(dimensionX-1-abs(p[0]-1), dimensionY-1-p[1], pirate)
-        elif id == assassins[1]: #Instead, let actteam return the string a2 for the second assassin
+        elif id == assassins[2]: #Instead, let actteam return the string a2 for the second assassin
             # print(dimensionX-1-p[0], dimensionY-1-abs(p[1]-1), pirate.getPosition())
-            # print(dimensionX-1-abs(p[0]-1), dimensionY-1-p[1])
+            # print('haha1', x, y, dimensionX-1-p[0], dimensionY-1-abs(p[1]-1))
             return moveTo(dimensionX-1-p[0], dimensionY-1-abs(p[1]-1), pirate)
-        elif gunpowder > 100 or id%2 == 1:  # Use the "gunpowder" variable
-            return moveTo(dimensionY-1-abs(p[0]-1), dimensionX-1-abs(p[1]-1), pirate)
+        elif gunpowder > 100 or id%2 == 0:  # Use the "gunpowder" variable
+            # print('haha2', dimensionX-1-abs(p[0]-1), dimensionY-1-abs(p[1]-1))
+            return moveTo(dimensionX-1-abs(p[0]-1), dimensionY-1-abs(p[1]-1), pirate)
         else:
             return moveTo(dimensionX-1-p[0], dimensionY-1-p[1], pirate)
 
     if pirate.getCurrentFrame() > 100:
         for island in colonists:
-            # print(type(colonists[island][0]))
-            # print(id, colonists[island])
             if id in colonists[island]:
-                # print(f'Acting colonist {id} on {island}')
-                # print(f'Colonists: {colonists}')
-                # print(island_pos)
-                # print('HERE')
                 return ActColonist(pirate, island_pos, colonists)
-    # if id in :
-    #     print(f'Acting colonist')
-    #     print(f'Colonists: {colonists}')
-    #     # print(f'Ghosts: {}')
-    #     return ActColonist(pirate)
     
     if id in deploy_guards:
         return ActGuard(deploy_guards[id][0], deploy_guards[id][1], pirate, deploy_guards[id][2])
@@ -802,12 +799,17 @@ def ActTeam(team):
                 'island2': [2**9-1, 2**9-1, 2**9-1],
                 'island3': [2**9-1, 2**9-1, 2**9-1]
             },
-            'assassins': [2**9-1, 2**9-1, 2**9-1],         }
+            'assassins': [2**9-1, 2**9-1, 2**9-1],         
+        }
     else:
         signal_data = decode_signal(team.getTeamSignal())
 
+    signal = encode_signal(signal_data)
+
     dimensionX = team.getDimensionX()
     dimensionY = team.getDimensionY()
+
+    team.setTeamSignal(signal)
     
     pirate_pos = dict()
 
@@ -815,40 +817,27 @@ def ActTeam(team):
     for signal in pirate_signals:
         if signal.count(',') != 3:
             continue
-        # print(signal)
         pirate_id, x, y, init_frame = signal.split(',')
-        # print(pirate_id, x, y, init_frame)
         pirate_pos[int(pirate_id)] = (int(x), int(y), int(init_frame))
 
     island_pos = signal_data['island_pos']
     colonists = signal_data['colonists']
     assassins = signal_data['assassins']
-    assassins = closest_n_pirates(dimensionX-1-team.getDeployPoint()[0], dimensionY-1-team.getDeployPoint()[1], 3, pirate_pos=pirate_positions);
-    # print(team.getCurrentFrame(), assassins)
+    # print(team.getCurrentFrame(), "ASSASSINS", assassins)
+    if team.getCurrentFrame() != 1:
+        # print('START', assassins)
+        # print(dimensionX-1-team.getDeployPoint()[0], dimensionY-1-team.getDeployPoint()[1], pirate_pos)
+        assassins = closest_n_pirates(dimensionX-1-team.getDeployPoint()[0], dimensionY-1-team.getDeployPoint()[1], 3, pirate_pos=pirate_pos)
+        # print(team.getCurrentFrame(), "ASSASSINS", assassins)
 
     if not reached_end:
         start_x, start_y = team.getDeployPoint()
-        # for i in range(team.getCurrentFrame(),1,-1):
-        #     # positions_i_want = [(x, y) for x in range(40) for y in range(40) if abs(start_x - x) + abs(start_y - y) == i]
-        #     possible_positions[i-1] = possible_positions[i-2].copy()
+
         possible_positions[team.getCurrentFrame()-1] = {(x, y): 0 for x in range(dimensionX) for y in range(dimensionY) if abs(start_x - x) + abs(start_y - y) == team.getCurrentFrame()}
-        curr_positions = list(pirate_positions.values())
+        curr_positions = list(pirate_pos.values())
         # print(curr_positions)
         for i in range(team.getCurrentFrame()-1):
             possible_positions[i-1] = {(x,y): curr_positions.count((x,y)) for x in range(dimensionX) for y in range(dimensionY) if abs(start_x-x) + abs(start_y-y) == i}
-        # positions_i_want = [(x, y) for x in range(39,-1,-1) for y in range(39,-1,-1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
-        # if start_x == 39 and start_y == 39:
-        #     positions_i_want = [(x, y) for x in range(39,-1,-1) for y in range(39,-1,-1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
-        # if start_x == 0 and start_y == 0:
-        #     positions_i_want = [(x, y) for x in range(40) for y in range(40) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
-        # if start_x == 0 and start_y == 39:
-        #     positions_i_want = [(x, y) for x in range(0, 40) for y in range(39, -1, -1) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
-        # if start_x == 39 and start_y == 0:
-        #     positions_i_want = [(x, y) for x in range(39, -1, -1) for y in range(40) if abs(start_x-x) + abs(start_y-y) == team.getCurrentFrame()]
-        # # random.shuffle(positions_i_want)
-        # # if (team.getCurrentFrame() % 2 == 0):
-        # #     positions_i_want.reverse()
-        # possible_positions = {key: 0 for key in positions_i_want}
         if (dimensionX-1-start_x, dimensionY-1-start_y) in possible_positions[team.getCurrentFrame()-1]:
             reached_end = True
     
@@ -860,23 +849,6 @@ def ActTeam(team):
     gunPowder = team.getTotalGunpowder()
     wood = team.getTotalWood()
     rum = team.getTotalRum()
-    
-    pirate_pos = dict()
-
-    pirate_signals = team.getListOfSignals()
-    for signal in pirate_signals:
-        if signal.count(',') != 3:
-            continue
-        pirate_id, x, y, init_frame = signal.split(',')
-        pirate_pos[int(pirate_id)] = (int(x), int(y), int(init_frame))
-
-    # pirates_on_islands = 0
-    # for island in island_pos:
-    #     if island_pos[island] != (0, 0):
-    #         for pirate in pirate_positions:
-    #             # if pirate_pos[pirate][0] <= island_pos[0] + 1 and pirate_pos[0] >= island_pos[0] - 1 and pirate_pos[1] <= island_pos[1] + 1 and pirate_pos[1] >= island_pos[1] - 1:
-    #             if pirate_positions[pirate][0] <= island_pos[island][0] + 1 and pirate_positions[pirate][0] >= island_pos[island][0] - 1 and pirate_positions[pirate][1] <= island_pos[island][1] + 1 and pirate_positions[pirate][1] >= island_pos[island][1] - 1:
-    #                 pirates_on_islands += 1
 
     start_x, start_y = team.getDeployPoint()
     list_of_signals = [int(sig.split(",")[0].strip()) for sig in team.getListOfSignals()]
@@ -888,7 +860,6 @@ def ActTeam(team):
     # print("NEW", dead_pirates)
     for id in dead_pirates:
         if id in assassins:
-            # print(id)
             assassins.pop(assassins.index(id))
         if id in deploy_guards:
             del deploy_guards[id]
@@ -897,13 +868,15 @@ def ActTeam(team):
         for key in colonists:
             if id in colonists[key]:
                 colonists[key].remove(id)
+    # print('here')
     for i in range(1, 4):
-        if island_pos[f'island{i}'] != (0, 0):
+        if island_pos[f'island{i}'] != (0, 0) and team.getCurrentFrame() > 1:
             colonists[f'island{i}'] = closest_n_pirates(island_pos[f'island{i}'][0], island_pos[f'island{i}'][1], 3, pirate_pos=pirate_pos)
-            if len(colonists[f'island{i}']) < 3:
+            while len(colonists[f'island{i}']) < 3:
                 if len(new_pirates) == 0:
                     break
                 colonists[f'island{i}'].append(new_pirates.pop(0))
+    # print('here2')
     if len(list_of_signals) < 15:
         for key in colonists:
             try:
@@ -912,14 +885,13 @@ def ActTeam(team):
             except:
                 pass
 
-
-    if len(assassins) <= 3 and len(list_of_signals) >= 3:
-        print("REPLENISHING")
+    # print('here3')
+    if len(assassins) <= 3 and len(list_of_signals) >= 3 and team.getCurrentFrame() > 1:
+        # print("REPLENISHING")
         assassins = closest_n_pirates(dimensionX-1-start_x, dimensionY-1-start_y, 3, pirate_pos=pirate_pos)
-        print('A', assassins)
+        # print('A', assassins)
+    # print('here4')
     if team.getCurrentFrame() > dimensionX and len(deploy_guards) < 2 and len(list_of_signals) >= 2:
-        # print(closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, team))
-        # print(closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, team)[1:])
         deploy_guards = {pirate: [start_x, start_y, 'blank'] for pirate in closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, pirate_pos=pirate_pos) + closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, pirate_pos=pirate_pos)[1:]}    
         deployed_guards = list(deploy_guards.keys())
         if len(deployed_guards) < 2:
@@ -962,6 +934,8 @@ def ActTeam(team):
             deploy_guards[deployed_guards[1]][1] = dimensionY-2
             deploy_guards[deployed_guards[1]][2] = 'up'
     earlier_list_of_signals = list_of_signals
+    signal_data['assassins'] = assassins
+    # print("END", assassins)
     signal = encode_signal(signal_data)
     # print(signal_data)
     team.setTeamSignal(signal)
