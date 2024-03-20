@@ -83,10 +83,9 @@ def decode_signal(signal):
     signal_data['colonists']['island3'] = [int(ord(signal[5]) // (2**9)), int(ord(signal[5]) % (2**9) // (2**0)), int(ord(signal[6]) // (2**9))]
 
     #Assassins...
-    
-    signal_data['assassins'] = [int(ord(signal[6]) % (2**9) // (2**0)), int(ord(signal[7]) // (2**9)), int(ord(signal[7]) % (2**9) // (2**0))]
+    signal_data['assassins'] = [int(ord(signal[7]) // (2**9)), int(ord(signal[7]) % (2**9) // (2**0)), int(ord(signal[8]) // (2**9))]
 
-    # print('decode', signal_data['assassins'])
+    # print('decode ass', signal_data['assassins'])
 
     return signal_data
 
@@ -105,7 +104,7 @@ def encode_signal(signal_data):
     signal += chr((2**9)*int(signal_data['assassins'][0]) + (2**0)*int(signal_data['assassins'][1]))
     signal += chr((2**9)*int(signal_data['assassins'][2]))
 
-    # print('encode', int(signal_data['assassins'][0]), int(signal_data['assassins'][1]), int(signal_data['assassins'][2]))
+    # print('encode ass', int(signal_data['assassins'][0]), int(signal_data['assassins'][1]), int(signal_data['assassins'][2]))
                   
     return signal
 
@@ -943,6 +942,6 @@ def ActTeam(team):
     signal_data['assassins'] = assassins
     # print('ASS', assassins)
     signal = encode_signal(signal_data)
-    # print('END ASS', assassins, signal_data['assassins'])
+    print('END ASS', assassins, signal_data['assassins'], decode_signal(encode_signal(signal_data))['assassins'])
     # print(signal_data)
     team.setTeamSignal(signal)
