@@ -1039,7 +1039,7 @@ def ActTeam(team):
     # print("NEW", dead_pirates)
     for id in dead_pirates:
         if id in assassins:
-            print(id)
+            # print(id)
             assassins.pop(assassins.index(id))
         if id in deploy_guards:
             del deploy_guards[id]

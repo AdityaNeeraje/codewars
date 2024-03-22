@@ -18,7 +18,7 @@ def moveTo(x, y, Pirate):
         return (position[1] < y) * 2 + 1
 
 def setthem(pirate):
-    s = pirate.GetCurretPosition()
+    s = pirate.getPosition()
     x = s[0]
     y = s[1]
 
@@ -190,17 +190,17 @@ def ActPirate(pirate):
         else:
             pirate.setSignal("random")
 
-    if pirate.GetYourSignal() =="mid":
+    if pirate.getSignal() =="mid":
         return 0
 
-    elif pirate.GetYourSignal() == "move":
-        s = pirate.GetCurrentTeamSignal()
+    elif pirate.getSignal() == "move":
+        s = pirate.getTeamSignal()
         l = s.split(",")
         x = int(l[0][1:])
         y = int(l[1])
         return moveTo(x, y, pirate)
     
-    elif pirate.GetYourSignal() == "random":
+    elif pirate.getSignal() == "random":
         return random.randint(1,4)
 
 def ActTeam(team):
@@ -211,4 +211,4 @@ def ActTeam(team):
         island_no = int(s[0])
         signal = l[island_no - 1]
         if signal == "myCaptured":
-            team.SetYourSignal("")
+            team.setSignal("")
