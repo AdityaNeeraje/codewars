@@ -490,7 +490,7 @@ def ActTeam(team):
     team.buildWalls(2)
     team.buildWalls(3)
 
-    if s:
+    if s:   
         island_no = int(s[0])
         signal = l[island_no - 1]
         if signal == "myCaptured":

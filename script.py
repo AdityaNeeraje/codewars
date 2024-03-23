@@ -15,7 +15,7 @@ name = "script"
 # }
 
 signals = {}
-deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
+# deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 # colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 # assassins = []
 earlier_list_of_signals = []
@@ -81,6 +81,11 @@ def decode_signal(signal):
 
 def encode_signal(signal_data):
     signal = ""
+    for island in signal_data['colonists']:
+        if len(signal_data['colonists'][island]) < 3:
+            while len(signal_data['colonists'][island]) < 3:
+                signal_data['colonists'][island].append(511)
+    print(signal_data)
 
     signal += chr((2**12)*signal_data['island_pos']['island1'][0] + (2**6)*signal_data['island_pos']['island1'][1] + (2**0)*signal_data['island_pos']['island2'][0])
     signal += chr((2**12)*signal_data['island_pos']['island2'][1] + (2**6)*signal_data['island_pos']['island3'][0] + (2**0)*signal_data['island_pos']['island3'][1])
@@ -93,7 +98,7 @@ def encode_signal(signal_data):
 
     signal += chr((2**9)*int(signal_data['assassins'][0]) + (2**0)*int(signal_data['assassins'][1]))
     signal += chr((2**9)*int(signal_data['assassins'][2]))
-                  
+    # print(signal)
     return signal
 
 def ActAsGuard(x, y, pirate, dir_island):
@@ -550,8 +555,8 @@ def ActPirate(pirate):
             if id in colonists[island]:
                 return ActColonist(pirate, island_pos, colonists)
     
-    if id in deploy_guards:
-        return ActGuard(deploy_guards[id][0], deploy_guards[id][1], pirate, deploy_guards[id][2])
+    # if id in deploy_guards:
+    #     return ActGuard(deploy_guards[id][0], deploy_guards[id][1], pirate, deploy_guards[id][2])
     
     island_pos = checkIsland(pirate=pirate, island_pos=island_pos)
     signal_data['island_pos'] = island_pos
@@ -782,8 +787,8 @@ def ActPirate(pirate):
 
 
 def ActTeam(team):
-    global earlier_list_of_signals, gunPowder, wood, rum, possible_positions, reached_end, deploy_guards
-    print(team.getTeamSignal())
+    global earlier_list_of_signals, gunPowder, wood, rum, possible_positions, reached_end
+    # print(team.getTeamSignal())
     if team.getCurrentFrame() == 1:
         signal_data = {
             'island_pos': {
@@ -858,8 +863,8 @@ def ActTeam(team):
     for id in dead_pirates:
         if id in assassins:
             assassins.pop(assassins.index(id))
-        if id in deploy_guards:
-            del deploy_guards[id]
+        # if id in deploy_guards:
+        #     del deploy_guards[id]
         if id in pirate_pos:
             del pirate_pos[id]
         for key in colonists:
@@ -888,48 +893,48 @@ def ActTeam(team):
         assassins = closest_n_pirates(dimensionX-1-start_x, dimensionY-1-start_y, 3, pirate_pos=pirate_pos)
         # print('A', assassins)
     # print('here4')
-    if team.getCurrentFrame() > dimensionX and len(deploy_guards) < 2 and len(list_of_signals) >= 2:
-        deploy_guards = {pirate: [start_x, start_y, 'blank'] for pirate in closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, pirate_pos=pirate_pos) + closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, pirate_pos=pirate_pos)[1:]}    
-        deployed_guards = list(deploy_guards.keys())
-        if len(deployed_guards) < 2:
-            closest_to_home = closest_n_pirates(start_x, 1*(start_y==0)+(dimensionY-2)*(start_y==(dimensionY-1)), min(5, len(list_of_signals)), pirate_pos=pirate_pos)
-            index = 0
-        while len(deploy_guards) < 2 and index < len(closest_to_home):
-            deploy_guards[closest_to_home[index]] = [start_x, start_y, 'blank']
-            index += 1
-            deployed_guards = list(deploy_guards.keys())
-        if start_x == 0 and start_y == 0 and 1 < len(deployed_guards):
-            # print("Guards", deployed_guards[0], deployed_guards[1])
-            deploy_guards[deployed_guards[0]][0] = 1
-            deploy_guards[deployed_guards[0]][1] = 0
-            deploy_guards[deployed_guards[0]][2] = 'left'
-            deploy_guards[deployed_guards[1]][0] = 0
-            deploy_guards[deployed_guards[1]][1] = 1
-            deploy_guards[deployed_guards[1]][2] = 'down'
-        if start_x == dimensionX-1 and start_y == 0 and 1 < len(deployed_guards):
-            # print("Guards", deployed_guards[0], deployed_guards[1])
-            deploy_guards[deployed_guards[0]][0] = dimensionX-2
-            deploy_guards[deployed_guards[0]][1] = 0
-            deploy_guards[deployed_guards[0]][2] = 'right'
-            deploy_guards[deployed_guards[1]][0] = dimensionX-1
-            deploy_guards[deployed_guards[1]][1] = 1
-            deploy_guards[deployed_guards[1]][2] = 'down'
-        if start_x == 0 and start_y == dimensionY-1 and 1 < len(deployed_guards):
-            # print("Guards", deployed_guards[0], deployed_guards[1])
-            deploy_guards[deployed_guards[0]][0] = 1
-            deploy_guards[deployed_guards[0]][1] = dimensionY-1
-            deploy_guards[deployed_guards[0]][2] = 'left'
-            deploy_guards[deployed_guards[1]][0] = 0
-            deploy_guards[deployed_guards[1]][1] = dimensionY-2
-            deploy_guards[deployed_guards[1]][2] = 'up'
-        if start_x == dimensionX-1 and start_y == dimensionY-1 and 1 < len(deployed_guards):
-            # print("Guards", deployed_guards[0], deployed_guards[1])
-            deploy_guards[deployed_guards[0]][0] = dimensionX-2
-            deploy_guards[deployed_guards[0]][1] = dimensionY-1
-            deploy_guards[deployed_guards[0]][2] = 'right'
-            deploy_guards[deployed_guards[1]][0] = dimensionX-1
-            deploy_guards[deployed_guards[1]][1] = dimensionY-2
-            deploy_guards[deployed_guards[1]][2] = 'up'
+    # if team.getCurrentFrame() > dimensionX and len(deploy_guards) < 2 and len(list_of_signals) >= 2:
+    #     deploy_guards = {pirate: [start_x, start_y, 'blank'] for pirate in closest_n_pirates(1*(start_x==0) + 38*(start_x==39), start_y, 1, pirate_pos=pirate_pos) + closest_n_pirates(start_x, 1*(start_y==0)+38*(start_y==39), 2, pirate_pos=pirate_pos)[1:]}    
+    #     deployed_guards = list(deploy_guards.keys())
+    #     if len(deployed_guards) < 2:
+    #         closest_to_home = closest_n_pirates(start_x, 1*(start_y==0)+(dimensionY-2)*(start_y==(dimensionY-1)), min(5, len(list_of_signals)), pirate_pos=pirate_pos)
+    #         index = 0
+    #     while len(deploy_guards) < 2 and index < len(closest_to_home):
+    #         deploy_guards[closest_to_home[index]] = [start_x, start_y, 'blank']
+    #         index += 1
+    #         deployed_guards = list(deploy_guards.keys())
+    #     if start_x == 0 and start_y == 0 and 1 < len(deployed_guards):
+    #         # print("Guards", deployed_guards[0], deployed_guards[1])
+    #         deploy_guards[deployed_guards[0]][0] = 1
+    #         deploy_guards[deployed_guards[0]][1] = 0
+    #         deploy_guards[deployed_guards[0]][2] = 'left'
+    #         deploy_guards[deployed_guards[1]][0] = 0
+    #         deploy_guards[deployed_guards[1]][1] = 1
+    #         deploy_guards[deployed_guards[1]][2] = 'down'
+    #     if start_x == dimensionX-1 and start_y == 0 and 1 < len(deployed_guards):
+    #         # print("Guards", deployed_guards[0], deployed_guards[1])
+    #         deploy_guards[deployed_guards[0]][0] = dimensionX-2
+    #         deploy_guards[deployed_guards[0]][1] = 0
+    #         deploy_guards[deployed_guards[0]][2] = 'right'
+    #         deploy_guards[deployed_guards[1]][0] = dimensionX-1
+    #         deploy_guards[deployed_guards[1]][1] = 1
+    #         deploy_guards[deployed_guards[1]][2] = 'down'
+    #     if start_x == 0 and start_y == dimensionY-1 and 1 < len(deployed_guards):
+    #         # print("Guards", deployed_guards[0], deployed_guards[1])
+    #         deploy_guards[deployed_guards[0]][0] = 1
+    #         deploy_guards[deployed_guards[0]][1] = dimensionY-1
+    #         deploy_guards[deployed_guards[0]][2] = 'left'
+    #         deploy_guards[deployed_guards[1]][0] = 0
+    #         deploy_guards[deployed_guards[1]][1] = dimensionY-2
+    #         deploy_guards[deployed_guards[1]][2] = 'up'
+    #     if start_x == dimensionX-1 and start_y == dimensionY-1 and 1 < len(deployed_guards):
+    #         # print("Guards", deployed_guards[0], deployed_guards[1])
+    #         deploy_guards[deployed_guards[0]][0] = dimensionX-2
+    #         deploy_guards[deployed_guards[0]][1] = dimensionY-1
+    #         deploy_guards[deployed_guards[0]][2] = 'right'
+    #         deploy_guards[deployed_guards[1]][0] = dimensionX-1
+    #         deploy_guards[deployed_guards[1]][1] = dimensionY-2
+    #         deploy_guards[deployed_guards[1]][2] = 'up'
     earlier_list_of_signals = list_of_signals
     signal_data['assassins'] = assassins
     signal = encode_signal(signal_data)
