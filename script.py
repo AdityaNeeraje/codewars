@@ -601,89 +601,89 @@ def ActPirate(pirate):
                 return moveTo(abs(dimensionX-1-id_mod_dim-start_x),abs(dimensionY-1-start_y), pirate)
             # if abs(x-start_x) < dimensionX-1 and abs(y-start_y) == dimensionY-1:
             #     return moveTo(abs(dimensionX-1-start_x),abs(dimensionY-1-start_y), pirate)
-    if not reached_end and possible_positions:
-        index = abs(pirate.getPosition()[0]-pirate.getDeployPoint()[0]) + abs(pirate.getPosition()[1]-pirate.getDeployPoint()[1])
-        # print(index, possible_positions[index])
-        # If position is x, y and start is start_x, start_y, then possible_positions x-start_x + y - start_y is needed
-        if pirate.getDeployPoint()[0] != pirate.getDeployPoint()[1]:
-            if id%2 == 0:
-                some_dict = dict(sorted({key: value for key, value in \
-                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], random.random())))
-            else:
-                if random.randint(0,8) != 0:
-                    if id%4 == 1:
-                        some_dict = dict(sorted({key: value for key, value in \
-                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
-                    else:
-                        some_dict = dict(sorted({key: value for key, value in \
-                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
-                else:
-                    if id%4 == 1:
-                        some_dict = dict(sorted({key: value for key, value in \
-                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
-                    else:
-                        some_dict = dict(sorted({key: value for key, value in \
-                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
-            # elif id%4 == 3:
-            #     some_dict = dict(sorted({key: value for key, value in \
-            #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
-        else:
-            if id%2 == 0:
-                some_dict = dict(sorted({key: value for key, value in \
-                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], random.random())))
-            else:
-                if random.randint(0,8) != 0:
-                    if id%4 == 1:
-                        some_dict = dict(sorted({key: value for key, value in \
-                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
-                    else:
-                        some_dict = dict(sorted({key: value for key, value in \
-                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1])))
-                else:
-                    if id%4 == 1:
-                        some_dict = dict(sorted({key: value for key, value in \
-                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1])))
-                    else:
-                        some_dict = dict(sorted({key: value for key, value in \
-                                                            possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
-            # elif id%4 == 1:
-            #     some_dict = dict(sorted({key: value for key, value in \
-            #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
-            # elif id%4 == 3:
-            #     some_dict = dict(sorted({key: value for key, value in \
-            #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1]))
-            # )
-
-        # if pirate.getDeployPoint()[0] != pirate.getDeployPoint()[1]:
-        #     if frame%(id%6 + 2) == 0:
-        #         some_dict = dict(sorted({key: value for key, value in \
-        #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (x[0][0]+1))))
-        #     else:
-        #         some_dict = dict(sorted({key: value for key, value in \
-        #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (dimensionX-x[0][1]))))
-        #     # elif id%3 == 1:
-        #     #     some_dict = dict(sorted({key: value for key, value in \
-        #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
-        #     # elif id%3 == 2:
-        #     #     some_dict = dict(sorted({key: value for key, value in \
-        #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
-        # else:
-        #     if frame%(id%6 + 2) == 0:
-        #         some_dict = dict(sorted({key: value for key, value in \
-        #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (x[0][0]+1))))
-        #     else:
-        #         some_dict = dict(sorted({key: value for key, value in \
-        #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (x[0][1]+1))))
-        #     # elif id %3 == 1:
-        #     #     some_dict = dict(sorted({key: value for key, value in \
-        #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
-        #     # elif id%3 == 2:
-        #     #     some_dict = dict(sorted({key: value for key, value in \
-        #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1]))
-        #     # )
-        choice = list(some_dict.keys())[0]
-        possible_positions[index][choice] += 1
-        return moveTo(choice[0], choice[1], pirate)
+    # if not reached_end and possible_positions:
+    #     index = abs(pirate.getPosition()[0]-pirate.getDeployPoint()[0]) + abs(pirate.getPosition()[1]-pirate.getDeployPoint()[1])
+    #     # print(index, possible_positions[index])
+    #     # If position is x, y and start is start_x, start_y, then possible_positions x-start_x + y - start_y is needed
+    #     if pirate.getDeployPoint()[0] != pirate.getDeployPoint()[1]:
+    #         if id%2 == 0:
+    #             some_dict = dict(sorted({key: value for key, value in \
+    #                                                      possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], random.random())))
+    #         else:
+    #             if random.randint(0,8) != 0:
+    #                 if id%4 == 1:
+    #                     some_dict = dict(sorted({key: value for key, value in \
+    #                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+    #                 else:
+    #                     some_dict = dict(sorted({key: value for key, value in \
+    #                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
+    #             else:
+    #                 if id%4 == 1:
+    #                     some_dict = dict(sorted({key: value for key, value in \
+    #                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
+    #                 else:
+    #                     some_dict = dict(sorted({key: value for key, value in \
+    #                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+    #         # elif id%4 == 3:
+    #         #     some_dict = dict(sorted({key: value for key, value in \
+    #         #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
+    #     else:
+    #         if id%2 == 0:
+    #             some_dict = dict(sorted({key: value for key, value in \
+    #                                                      possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], random.random())))
+    #         else:
+    #             if random.randint(0,8) != 0:
+    #                 if id%4 == 1:
+    #                     some_dict = dict(sorted({key: value for key, value in \
+    #                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+    #                 else:
+    #                     some_dict = dict(sorted({key: value for key, value in \
+    #                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1])))
+    #             else:
+    #                 if id%4 == 1:
+    #                     some_dict = dict(sorted({key: value for key, value in \
+    #                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1])))
+    #                 else:
+    #                     some_dict = dict(sorted({key: value for key, value in \
+    #                                                         possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+    #         # elif id%4 == 1:
+    #         #     some_dict = dict(sorted({key: value for key, value in \
+    #         #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+    #         # elif id%4 == 3:
+    #         #     some_dict = dict(sorted({key: value for key, value in \
+    #         #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1]))
+    #         # )
+    #
+    #     # if pirate.getDeployPoint()[0] != pirate.getDeployPoint()[1]:
+    #     #     if frame%(id%6 + 2) == 0:
+    #     #         some_dict = dict(sorted({key: value for key, value in \
+    #     #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (x[0][0]+1))))
+    #     #     else:
+    #     #         some_dict = dict(sorted({key: value for key, value in \
+    #     #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (dimensionX-x[0][1]))))
+    #     #     # elif id%3 == 1:
+    #     #     #     some_dict = dict(sorted({key: value for key, value in \
+    #     #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+    #     #     # elif id%3 == 2:
+    #     #     #     some_dict = dict(sorted({key: value for key, value in \
+    #     #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], -x[0][1])))
+    #     # else:
+    #     #     if frame%(id%6 + 2) == 0:
+    #     #         some_dict = dict(sorted({key: value for key, value in \
+    #     #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (x[0][0]+1))))
+    #     #     else:
+    #     #         some_dict = dict(sorted({key: value for key, value in \
+    #     #                                                  possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], (x[0][1]+1))))
+    #     #     # elif id %3 == 1:
+    #     #     #     some_dict = dict(sorted({key: value for key, value in \
+    #     #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][0])))
+    #     #     # elif id%3 == 2:
+    #     #     #     some_dict = dict(sorted({key: value for key, value in \
+    #     #     #                                              possible_positions[index].items() if abs(key[0]-pirate.getPosition()[0]) + abs(key[1] - pirate.getPosition()[1]) == 1}.items(), key=lambda x: (x[1], x[0][1]))
+    #     #     # )
+    #     choice = list(some_dict.keys())[0]
+    #     possible_positions[index][choice] += 1
+    #     return moveTo(choice[0], choice[1], pirate)
         
     if id%10 == 1:
         if p[0] == 0 and p[1] == 0:
@@ -856,16 +856,16 @@ def ActTeam(team):
         assassins = closest_n_pirates(dimensionX-1-team.getDeployPoint()[0], dimensionY-1-team.getDeployPoint()[1], 3, pirate_pos=pirate_pos)
         # print(team.getCurrentFrame(), "ASSASSINS", assassins)
 
-    if not reached_end:
-        start_x, start_y = team.getDeployPoint()
-
-        possible_positions[team.getCurrentFrame()-1] = {(x, y): 0 for x in range(dimensionX) for y in range(dimensionY) if abs(start_x - x) + abs(start_y - y) == team.getCurrentFrame()}
-        curr_positions = list(pirate_pos.values())
-        # print(curr_positions)
-        for i in range(team.getCurrentFrame()-1):
-            possible_positions[i-1] = {(x,y): curr_positions.count((x,y)) for x in range(dimensionX) for y in range(dimensionY) if abs(start_x-x) + abs(start_y-y) == i}
-        if (dimensionX-1-start_x, dimensionY-1-start_y) in possible_positions[team.getCurrentFrame()-1]:
-            signal_data['reached_end'] = True
+    # if not reached_end:
+    #     start_x, start_y = team.getDeployPoint()
+    #
+    #     possible_positions[team.getCurrentFrame()-1] = {(x, y): 0 for x in range(dimensionX) for y in range(dimensionY) if abs(start_x - x) + abs(start_y - y) == team.getCurrentFrame()}
+    #     curr_positions = list(pirate_pos.values())
+    #     # print(curr_positions)
+    #     for i in range(team.getCurrentFrame()-1):
+    #         possible_positions[i-1] = {(x,y): curr_positions.count((x,y)) for x in range(dimensionX) for y in range(dimensionY) if abs(start_x-x) + abs(start_y-y) == i}
+    #     if (dimensionX-1-start_x, dimensionY-1-start_y) in possible_positions[team.getCurrentFrame()-1]:
+    #         signal_data['reached_end'] = True
     
     if team.getCurrentFrame() >= dimensionX+dimensionX+18:
         team.buildWalls(1)
