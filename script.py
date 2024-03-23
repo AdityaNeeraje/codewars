@@ -788,6 +788,21 @@ def ActPirate(pirate):
 
 def ActTeam(team):
     global earlier_list_of_signals, gunPowder, wood, rum, possible_positions, reached_end
+    data = {
+        16: 22,
+        20: 35,
+        24: 45,
+        28: 60,
+        32: 70,
+        36: 75,
+        40: 90,
+        44: 115,
+        48: 130,
+        52: 130,
+        56: 140,
+        60: 140,
+        64: 160
+    }
     # print(team.getTeamSignal())
     if team.getCurrentFrame() == 1:
         signal_data = {
@@ -892,7 +907,7 @@ def ActTeam(team):
         # print("REPLENISHING")
         assassins = closest_n_pirates(dimensionX-1-start_x, dimensionY-1-start_y, 3, pirate_pos=pirate_pos)
         # print('A', assassins)
-    if len(pirate_pos.keys()) <= 20:
+    if len(pirate_pos.keys()) <= 20 or team.getCurrentFrame() > data[dimensionX]:
         assassins = [511, 511, 511]
     # print('here4')
     # if team.getCurrentFrame() > dimensionX and len(deploy_guards) < 2 and len(list_of_signals) >= 2:
