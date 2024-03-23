@@ -18,9 +18,9 @@ signals = {}
 # deploy_guards = {} # This has the id of every living guard as a key and their position and direction relative to island center as values.
 # colonists = {} # This has the id of every living colonist as a key and the coordinate of their island center as value
 # assassins = []
-earlier_list_of_signals = []
+# earlier_list_of_signals = []
 possible_positions = {id: {} for id in range(78)} # subtract frame from the current frame to get the id number (maybe +1)
-reached_end = False
+# reached_end = False
 
 def encode_direction(direction):
     match(direction):
@@ -62,6 +62,7 @@ def decode_signal(signal):
             'island3': []
         },
         'assassins': [],
+        'reached_end': False,
     }
     
     #Island Positions...
@@ -77,6 +78,9 @@ def decode_signal(signal):
     #Assassins...
     signal_data['assassins'] = [int(ord(signal[7]) // (2**9)), int(ord(signal[7]) % (2**9) // (2**0)), int(ord(signal[8]) // (2**9))]
 
+    #Reached End...
+    signal_data['reached_end'] = bool(ord(signal[8]))
+
     return signal_data
 
 def encode_signal(signal_data):
@@ -85,7 +89,7 @@ def encode_signal(signal_data):
         if len(signal_data['colonists'][island]) < 3:
             while len(signal_data['colonists'][island]) < 3:
                 signal_data['colonists'][island].append(511)
-    print(signal_data)
+    # print(signal_data)
 
     signal += chr((2**12)*signal_data['island_pos']['island1'][0] + (2**6)*signal_data['island_pos']['island1'][1] + (2**0)*signal_data['island_pos']['island2'][0])
     signal += chr((2**12)*signal_data['island_pos']['island2'][1] + (2**6)*signal_data['island_pos']['island3'][0] + (2**0)*signal_data['island_pos']['island3'][1])
@@ -98,6 +102,9 @@ def encode_signal(signal_data):
 
     signal += chr((2**9)*int(signal_data['assassins'][0]) + (2**0)*int(signal_data['assassins'][1]))
     signal += chr((2**9)*int(signal_data['assassins'][2]))
+
+    signal += chr(int(signal_data['reached_end']))
+        
     # print(signal)
     return signal
 
@@ -816,7 +823,8 @@ def ActTeam(team):
                 'island2': [2**9-1, 2**9-1, 2**9-1],
                 'island3': [2**9-1, 2**9-1, 2**9-1]
             },
-            'assassins': [2**9-1, 2**9-1, 2**9-1],         
+            'assassins': [2**9-1, 2**9-1, 2**9-1],
+            'reached_end': False,
         }
     else:
         signal_data = decode_signal(team.getTeamSignal())
@@ -840,6 +848,7 @@ def ActTeam(team):
     island_pos = signal_data['island_pos']
     colonists = signal_data['colonists']
     assassins = signal_data['assassins']
+    reached_end = signal_data['reached_end']
     # print(team.getCurrentFrame(), "ASSASSINS", assassins)
     if team.getCurrentFrame() != 1:
         # print('START', assassins)
@@ -856,7 +865,7 @@ def ActTeam(team):
         for i in range(team.getCurrentFrame()-1):
             possible_positions[i-1] = {(x,y): curr_positions.count((x,y)) for x in range(dimensionX) for y in range(dimensionY) if abs(start_x-x) + abs(start_y-y) == i}
         if (dimensionX-1-start_x, dimensionY-1-start_y) in possible_positions[team.getCurrentFrame()-1]:
-            reached_end = True
+            signal_data['reached_end'] = True
     
     if team.getCurrentFrame() >= dimensionX+dimensionX+18:
         team.buildWalls(1)
@@ -868,31 +877,44 @@ def ActTeam(team):
     rum = team.getTotalRum()
 
     start_x, start_y = team.getDeployPoint()
-    list_of_signals = [int(sig.split(",")[0].strip()) for sig in team.getListOfSignals()]
+    list_of_signals = [int(sig.split(",")[0].strip()) for sig in team.getListOfSignals() if sig.split(",")[0].isnumeric()]
     # print(earlier_list_of_signals)
     # print(list_of_signals)
-    new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
-    dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals] 
+    # new_pirates = [int(id) for id in list_of_signals if id not in earlier_list_of_signals]
+    # dead_pirates = [int(id) for id in earlier_list_of_signals if id not in list_of_signals] 
     # print("NEW", new_pirates)
     # print("NEW", dead_pirates)
-    for id in dead_pirates:
-        if id in assassins:
-            assassins.pop(assassins.index(id))
-        # if id in deploy_guards:
-        #     del deploy_guards[id]
-        if id in pirate_pos:
-            del pirate_pos[id]
-        for key in colonists:
-            if id in colonists[key]:
-                colonists[key].remove(id)
+    for key in colonists:
+        ids_to_remove = []
+        for id in colonists[key]:
+            if id not in list_of_signals:
+                ids_to_remove.append(id)
+        for id in ids_to_remove:
+            colonists[key].remove(id)
+
+    # legacy code relying on earlier_list_of_signals
+    # for id in dead_pirates:
+    #     if id in assassins:
+    #         assassins.pop(assassins.index(id))
+    #         print("here1")
+    #     # if id in deploy_guards:
+    #     #     del deploy_guards[id]
+    #     if id in pirate_pos:
+    #         print("here2")
+    #         del pirate_pos[id]
+    #     for key in colonists:
+    #         if id in colonists[key]:
+    #             print(f"here3{id}")
+    #             colonists[key].remove(id)
+
     # print('here')
     for i in range(1, 4):
         if island_pos[f'island{i}'] != (0, 0) and team.getCurrentFrame() > 1:
             colonists[f'island{i}'] = closest_n_pirates(island_pos[f'island{i}'][0], island_pos[f'island{i}'][1], 3, pirate_pos=pirate_pos)
-            while len(colonists[f'island{i}']) < 3:
-                if len(new_pirates) == 0:
-                    break
-                colonists[f'island{i}'].append(new_pirates.pop(0))
+            # while len(colonists[f'island{i}']) < 3:
+            #     if len(new_pirates) == 0:
+            #         break
+            #     colonists[f'island{i}'].append(new_pirates.pop(0))
     # print('here2')
     if len(list_of_signals) < 15:
         for key in colonists:
